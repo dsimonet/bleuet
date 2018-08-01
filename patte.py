@@ -2,10 +2,8 @@
 #-*- coding: utf-8 -*-
 
 
-# Simple demo of of the PCA9685 PWM servo/LED controller library.
-# This will move channel 0 from min to max position repeatedly.
-# Author: Tony DiCola
-# License: Public Domain
+#Dsimonet
+
 from __future__ import division
 from threading import Thread
 import time

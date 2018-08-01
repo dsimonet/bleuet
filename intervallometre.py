@@ -1,3 +1,5 @@
+# from : https://python.jpvweb.com/python/mesrecettespython/doku.php?id=fonction_periodique
+
 ##############################################
 # THREADING
 ##############################################
