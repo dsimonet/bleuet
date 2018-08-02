@@ -8,42 +8,59 @@
 import Adafruit_PCA9685
 
 
+#see here https://stackoverflow.com/questions/739882/iterating-over-object-instances-of-a-given-class-in-python
+class IterRegistry(type):
+    def __iter__(cls):
+        return iter(cls._registry)
+
+
+##############################################
+# Motor
+##############################################
+
 class motor :
+
+	__metaclass__ = IterRegistry
+	_registry = []
 
 	#library who drive motor in low level I2C
 	pwm = Adafruit_PCA9685.PCA9685()
 
-	#minimal/maximal input default value 
-	ctrl_min_value = 0
-	ctrl_max_value = 100
 
-	#minimal/maximal output PWM default value
-	#starting a 100 because between 0 and value near 30 mlservo is off and position is evaluate between this range.
-	#so you have a dead zone beatween 0 to 30 and 100 to 600
-	servo_min = 120  
-	servo_max = 620 
-
-	# in calculation of move, some ratio value are calculate a every move but not chang
+	# in calculation of move, some ratio value are calculate a every move but not change
 	# so we added a précalculate value of them
 	preComputedScaleValue = None
 
 	def __init__ (self, _pin, freq=60):
+		self._registry.append(self)
 		self.pwm.set_pwm_freq(freq)
 		self.pin = _pin
 		self.value = None	#last position received 
 		self.position = None	#last position sent
-		self.preComputedScaleValue =  (self.servo_max - self.servo_min) / (self.ctrl_max_value - self.ctrl_min_value)	# précomputing of one value used in move
 
-	#tweaking meathodes but affect every instance of motor
-	@staticmethod
-	def setMinMaxInput(min, max):
+		#minimal/maximal input default value 
+		self.ctrl_min_value = -50
+		self.ctrl_max_value = 50
+
+		#minimal/maximal output PWM default value
+		#starting a 100 because between 0 and value near 30 mlservo is off and position is evaluate between this range.
+		#so you have a dead zone beatween 0 to 30 and 100 to 600
+		self.servo_min = 120  
+		self.servo_max = 620
+
+		# précomputing of one value used in move
+		self.computeScaleValue()	
+
+	#tweaking methodes values
+	def setMinMaxInput(self, min, max):
 		motor.ctrl_min_value = min
 		motor.ctrl_max_value = max
+		self.computeScaleValue()
 
-	@staticmethod
-	def setMinMaxOutput(min, max):
+	def setMinMaxOutput(self, min, max):
 		motor.servo_min = min
 		motor.servo_max = max
+		self.computeScaleValue()
 
 	def move(self, v):
 		self.value = v
@@ -70,36 +87,40 @@ class motor :
 	def on(self) :
 		self.move(self.value)
 
+	#reset motor position by sending center value of min/max input to move mthode
 	def reset(self) :
 		self.move(self.ctrl_min_value + (self.ctrl_max_value-self.ctrl_min_value)/2 )
 
+	def computeScaleValue(self):
+		self.preComputedScaleValue =  (self.servo_max - self.servo_min) / (self.ctrl_max_value - self.ctrl_min_value)
 
+	# change side mouvement of motor
+	def reverseMotor(self):
+		temp = self.ctrl_min_value
+		self.ctrl_min_value = self.ctrl_max_value
+		self.ctrl_max_value = temp
 
-
+		self.computeScaleValue()
 
 #excuted if this doc is not imported
 if __name__ == '__main__':
 
 	import time
 
-	phi1 = motor(2)
-	motor.setMinMaxInput(-50,50)
-
-	phi1.move(0)
-	time.sleep(0.5)
-	phi1.safeMove(250)
-	time.sleep(1)
-	phi1.move(25)
-	time.sleep(0.5)
-
-	phi1.off()
-	time.sleep(1)
-	phi1.on()
-	time.sleep(1)
-
-	phi1.reset()
-	time.sleep(0.1)
+	phi = motor(0)
+	motA = motor(1)
+	motB = motor(2)
+	motB.reverseMotor()
 
 	for i in range(-50,50):
-		phi1.move(i)
+		phi.move(i)
+		motA.move(i)
+		motB.move(i)
 		time.sleep(0.1)
+
+	phi.move(10)
+	motA.move(10)
+	motB.move(10)
+
+	for i in motor :
+		i.reset()
