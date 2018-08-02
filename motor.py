@@ -36,8 +36,8 @@ class motor :
 		#minimal/maximal output PWM default value
 		#starting a 100 because between 0 and value near 30 mlservo is off and position is evaluate between this range.
 		#so you have a dead zone beatween 0 to 30 and 100 to 600
-		self.servo_min = 120  
-		self.servo_max = 620
+		self.servo_min = 130 
+		self.servo_max = 630
 
 		# précomputing of one value used in move
 		self.computeScaleValue()	

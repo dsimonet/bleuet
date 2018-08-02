@@ -13,8 +13,11 @@ from body import *
 body = body()
 
 body.Down()
+time.sleep(1)
 body.Up()
+time.sleep(1)
 body.Down()
+time.sleep(1)
 body.Stand()
 
 
