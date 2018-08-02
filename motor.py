@@ -8,20 +8,12 @@
 import Adafruit_PCA9685
 
 
-#see here https://stackoverflow.com/questions/739882/iterating-over-object-instances-of-a-given-class-in-python
-class IterRegistry(type):
-    def __iter__(cls):
-        return iter(cls._registry)
-
 
 ##############################################
 # Motor
 ##############################################
 
 class motor :
-
-	__metaclass__ = IterRegistry
-	_registry = []
 
 	#library who drive motor in low level I2C
 	pwm = Adafruit_PCA9685.PCA9685()
@@ -32,7 +24,6 @@ class motor :
 	preComputedScaleValue = None
 
 	def __init__ (self, _pin, freq=60):
-		self._registry.append(self)
 		self.pwm.set_pwm_freq(freq)
 		self.pin = _pin
 		self.value = None	#last position received 
@@ -121,6 +112,3 @@ if __name__ == '__main__':
 	phi.move(10)
 	motA.move(10)
 	motB.move(10)
-
-	for i in motor :
-		i.reset()
