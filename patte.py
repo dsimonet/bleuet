@@ -13,21 +13,6 @@ import ease
 # Import the PCA9685 module.
 import Adafruit_PCA9685
 
-# Uncomment to enable debug output.
-#import logging
-#logging.basicConfig(level=logging.DEBUG)
-
-
-# Helper function to make setting a servo pulse width simpler.
-def set_servo_pulse(channel, pulse):
-    pulse_length = 1000000    # 1,000,000 us per second
-    pulse_length //= 60       # 60 Hz
-    print('{0}us per period'.format(pulse_length))
-    pulse_length //= 4096     # 12 bits of resolution
-    print('{0}us per bit'.format(pulse_length))
-    pulse *= 1000
-    pulse //= pulse_length
-    pwm.set_pwm(channel, 0, pulse)
 
 
 
@@ -108,7 +93,7 @@ class Patte() :
 	@staticmethod
 	def waitUntilFinish():
 		while not Patte.allReady() :
-			None
+			pass
 
 	@staticmethod
 	def allPosition(_phi, _a, _b):

@@ -7,6 +7,13 @@
 # untested :P
 
 
+#on calcul la position actuel avec une fonction ease
+#ease(t, b, c, d)
+# t is the current time (or position) of the tween.
+# b is the beginning value of the property.
+# c is the change between the beginning and destination value of the property.
+# d is the total time of the tween.
+
 import math
 
 linearTween = lambda t, b, c, d : c*t/d + b
