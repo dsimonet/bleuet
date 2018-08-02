@@ -70,9 +70,12 @@ class motor :
 	def on(self) :
 		self.move(self.value)
 
+	def reset(self) :
+		self.move(self.ctrl_min_value + (self.ctrl_max_value-self.ctrl_min_value)/2 )
 
 
-"""
+
+
 
 #excuted if this doc is not imported
 if __name__ == '__main__':
@@ -85,7 +88,7 @@ if __name__ == '__main__':
 	phi1.move(0)
 	time.sleep(0.5)
 	phi1.safeMove(250)
-	time.sleep(10)
+	time.sleep(1)
 	phi1.move(25)
 	time.sleep(0.5)
 
@@ -93,8 +96,10 @@ if __name__ == '__main__':
 	time.sleep(1)
 	phi1.on()
 	time.sleep(1)
-	
+
+	phi1.reset()
+	time.sleep(0.1)
+
 	for i in range(-50,50):
 		phi1.move(i)
 		time.sleep(0.1)
-"""
