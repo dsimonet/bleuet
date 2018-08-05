@@ -94,6 +94,7 @@ class motor :
 		self.computeScaleValue()
 
 #excuted if this doc is not imported
+# for testing purpose only
 if __name__ == '__main__':
 
 	import time
