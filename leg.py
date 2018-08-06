@@ -15,10 +15,6 @@ class IterRegistry(type):
         return iter(cls._registry)
 
 
-##############################################
-# Leg
-##############################################
-
 class Leg() :
 
 	# for iterate over instances
@@ -28,47 +24,94 @@ class Leg() :
 	#_counter = 0
 	#_duration = 64
 
-	def __init__(self, _bus, _phi, _A, _B):
+	def __init__(self, _phi, _A, _B):
 
 		#register and iteration
 		self._registry.append(self)
 		self.name = "Leg_" + str(len(self._registry)-1)
 
-		self.ready = False
+		self.side = True #True =  "normal" & False = "reverse"
 
-		#not used yet
-		self.bus = _bus
-
-		# les valeurs des moteurs sur la carte de pilotage
+		# Instanciate motor class for each par of leg
 		self.mot_phi = motor(_phi)
 		self.mot_A = motor(_A)
-		self.mot_A.reverseMotor()
 		self.mot_B = motor(_B)
+
+		self.mot_A.reverseMotor()
 		
-
-		#veleurs des positions des moteurs 
-		# 50 5 et 70 pour un stand
-		self.phi = 50
-		self.a = 5
-		self.b = 70
-
-		self.phiFrom = self.phi
-		self.aFrom = self.a
-		self.bFrom = self.b
-
-		self.phiTo = self.phi
-		self.aTo = self.a
-		self.bTo = self.b 
-
-		self.standPosition()
 
 	#METHODES STATICS
 
 	@staticmethod
-	def updateAll() :
-		for i in Leg._registry:
-			i.update()
+	def allPosition(_phi, _a, _b):
+		for leg in Leg._registry :
+			leg.position(_phi, _a, _b)
 
+	
+
+	#METHODES
+
+	def isReady() :
+		return self.ready
+
+	def position(self, _phi, _A, _B):
+		self.mot_phi.move(_phi)
+		self.mot_A.move(_A)
+		self.mot_B.move(_B)
+
+	def reverseLeg(self):
+		self.mot_phi.reverseMotor()
+		self.mot_A.reverseMotor()
+		self.mot_B.reverseMotor()
+		self.side = not self.side
+
+	def height(self, _v):
+		self.mot_A.move(50-_v/2)
+		self.mot_B.move(_v/2)
+
+	def orient(self, _phi):
+		self.mot_phi.move(_phi)
+
+	def off(self):
+		self.mot_phi.off()
+		self.mot_A.off()
+		self.mot_B.off()
+
+	def moveTo(self, position) :
+		if position == "stand":
+			self.mot_phi.move(0)
+			self.mot_A.move(40)
+			self.mot_B.move(20)		
+			return
+
+		if position == "unfold":
+			self.mot_phi.move(0)
+			self.mot_A.move(0)
+			self.mot_B.move(0)
+
+		if position == "fold":
+			self.mot_phi.move(0)
+			self.mot_A.move(0)
+			self.mot_B.move(0)	
+
+	"""
+
+
+
+	#veleurs des positions des moteurs 
+	# 50 5 et 70 pour un stand
+	self.phi = 50
+	self.a = 5
+	self.b = 70
+
+	self.phiFrom = self.phi
+	self.aFrom = self.a
+	self.bFrom = self.b
+
+	self.phiTo = self.phi
+	self.aTo = self.a
+	self.bTo = self.b 
+		
 	@staticmethod
 	def speed(v):
 		Leg._duration = v
@@ -82,41 +125,12 @@ class Leg() :
 				return False
 		return True
 
+
 	@staticmethod
 	def waitUntilFinish():
 		while not Leg.allReady() :
 			pass
-
-	@staticmethod
-	def allPosition(_phi, _a, _b):
-		for p in Leg._registry :
-			p.position(_phi, _a, _b)
-
-	#METHODES
-
-	def isReady() :
-		return self.ready
-
-	def position(self, _phi, _A, _B):
-		#on va update la nouvelle direction des moteurs
-		#on stock la valeur actuel dans la position d'origine
-		self.phiFrom = self.phi
-		self.aFrom = self.a
-		self.bFrom = self.b
-
-		#les nouvelles valeurs ou on doit allé sont enregistré
-		self.phiTo = _phi
-		self.aTo = _A
-		self.bTo = _B
-
-		self._counter = 0
-		self.ready = False
-
-
-	def move(self, _phi, _a, _b):
-		self.pwm.set_pwm(self.motorPhi, 1, self.servoPC(_phi) )
-		self.pwm.set_pwm(self.motorA, 1, self.servoPC(_a) )
-		self.pwm.set_pwm(self.motorB, 1, self.servoPC(_b) )
+	
 
 	def updateSoft(self):
 
@@ -141,16 +155,7 @@ class Leg() :
 		#On fait bouger les moteurs en fonction des nouvelles valeurs calculé
 		self.move(self.phi, self.a, self.b)
 	
-	def update(self):
-		pass
-
-	# POSITION
-
-	def standPosition(self):
-		self.mot_phi.move(0)
-		self.mot_A.move(40)
-		self.mot_B.move(20)
-
+"""
 
 
 
@@ -159,31 +164,43 @@ class Leg() :
 if __name__ == '__main__':
 
 	import time
-	import random
 
 	#Create leg for robot and passing them were are connected motor
-	leg_0 = Leg(0,0,1,2)
-	leg_1 = Leg(0,4,5,6)
-	leg_2 = Leg(0,8,9,10)
+	leg_0 = Leg(0,1,2)
+	leg_1 = Leg(4,5,6)
+	leg_2 = Leg(8,9,10)
 
-	
-	for j in range(0,50):
-		for i in Leg :
-			i.mot_A.move(50-j)
-			i.mot_B.move(j)
-		time.sleep(0.05)
-	
-	for j in range(0,50):
-		for i in Leg :
-			i.mot_A.move(50-j)
-			i.mot_B.move(j)
-		time.sleep(0.05)
 
-	for i in Leg :
-		i.standPosition()
+	for a in range(0,5):
 
-	time.sleep(0.5)
+		for leg in Leg :
+			leg.height(100)
+			leg.moveTo("unfold")
 
+		leg_0.orient(-10)
+		leg_1.orient(30)
+		leg_2.orient(-10)
+
+		time.sleep(0.5)
+
+		for leg in Leg :
+			leg.height(10)
+
+		time.sleep(0.5)
+
+		leg_0.orient(10)
+		leg_1.orient(-10)
+		leg_2.orient(30)
+
+		time.sleep(0.5)
+
+	"""
+	for a in range(0,10):
+		for i in range(0,100):
+			for leg in Leg :
+				leg.height(0, i)
+
+	"""
 	for i in Leg :
 		i.mot_phi.off()
 		i.mot_A.off()
