@@ -24,7 +24,7 @@ class motor :
 	preComputedScaleValue = None
 
 	def __init__ (self, _pin, freq=60):
-		self.pwm.set_pwm_freq(freq)
+		motor.pwm.set_pwm_freq(freq)
 		self.pin = _pin
 		self.value = None	#last position received 
 		self.position = None	#last position sent
@@ -56,7 +56,7 @@ class motor :
 	def move(self, v):
 		self.value = v
 		self.position =  self.servo_min + (v - self.ctrl_min_value) * self.preComputedScaleValue # <-- see the précaculate value
-		self.pwm.set_pwm(self.pin, 1, int(self.position) )
+		motor.pwm.set_pwm(self.pin, 1, int(self.position) )
 
 	def safeMove(self, v):
 		if v < self.ctrl_min_value:
@@ -69,16 +69,16 @@ class motor :
 	# use with caution can block or damage motor if set PWM value under move capability
 	#but reconized by servo as valid move (not in off range)
 	def moveRaw(self, v):
-		self.pwm.set_pwm(self.pin, 1, int(v) )
+		motor.pwm.set_pwm(self.pin, 1, int(v) )
 	
 	#value between dead zone make motor off. 0 & 0 make pwm ratio to zero so motor stop
 	def off(self):
-		self.pwm.set_pwm(self.pin, 0, 0)
+		motor.pwm.set_pwm(self.pin, 0, 0)
 	#get back the inital value
 	def on(self) :
 		self.move(self.value)
 
-	#reset motor position by sending center value of min/max input to move mthode
+	#reset motor position by sending center value of min/max input to move methode
 	def reset(self) :
 		self.move(self.ctrl_min_value + (self.ctrl_max_value-self.ctrl_min_value)/2 )
 
