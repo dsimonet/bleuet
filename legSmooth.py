@@ -16,7 +16,7 @@ class LegSmooth(Leg) :
 		Leg.__init__(self, _phi, _A, _B)
 
 		self._counter = LegSmooth._duration
-
+		self.name = "Leg_"+ str(len(LegSmooth._registry)-1)
 		#veleurs des positions des moteurs 
 		# 50 5 et 70 pour un stand
 		self.phi = 0
@@ -34,7 +34,7 @@ class LegSmooth(Leg) :
 
 	@staticmethod
 	def startThread():
-		LegSmooth._timer = Intervallometre(0.0001, LegSmooth.updateSoftAll)
+		LegSmooth._timer = Intervallometre(0.001, LegSmooth.updateSoftAll)
 		LegSmooth._timer.setDaemon(True)
 		LegSmooth._timer.start()
 		time.sleep(0.1)
@@ -64,24 +64,35 @@ class LegSmooth(Leg) :
 		time.sleep(0.1)
 
 	@staticmethod
-	def allReady() :
+	def waitUntilFinish():
+		if LegSmooth._duration > 1 :
+			while 1 :
+				if LegSmooth.allReady() :
+					break
+				else:
+					time.sleep(0.03)
+		else:
+			time.sleep(0.1)
+			
+	@staticmethod
+	def allReady():
 		for leg in LegSmooth :
-			if leg._counter == LegSmooth._duration :
-				continue
+			if leg.ready() :
+				pass
 			else:
 				return False
 		return True
-
-
-	@staticmethod
-	def waitUntilFinish():
-		while not LegSmooth.allReady() :
-			pass
 
 	@staticmethod
 	def updateSoftAll():
 		for leg in LegSmooth:
 			leg.updateSoft()
+
+	def ready(self):
+		if self._counter == LegSmooth._duration :
+			return True
+		else:
+			return False
 	
 
 	def position(self, _phi, _A, _B):
@@ -96,7 +107,8 @@ class LegSmooth(Leg) :
 		self.aTo = _A
 		self.bTo = _B
 
-		self._counter = 0
+		if(LegSmooth._duration > 1):
+			self._counter = 0
 
 	def orient(self, _phi):
 		self.position(_phi, self.aTo, self.bTo)
@@ -106,24 +118,28 @@ class LegSmooth(Leg) :
 
 	def updateSoft(self):
 
-		if(self._duration > 1):
+		if(LegSmooth._duration > 1):
 			#compute position from last position trough a ease function
 			#ease(t, b, c, d)
 			# t is the current time (or position) of the tween.
 			# b is the beginning value of the property.
 			# c is the change between the beginning and destination value of the property.
 			# d is the total time of the tween.
-			self.phi = ease.easeInOutQuad(float(self._counter), self.phiFrom, self.phiTo-self.phiFrom, float(self._duration) )
-			self.a = ease.easeInOutQuad(float(self._counter), self.aFrom, self.aTo-self.aFrom, float(self._duration) )
-			self.b = ease.easeInOutQuad(float(self._counter), self.bFrom, self.bTo-self.bFrom, float(self._duration) )
+			self.phi = ease.easeInOutQuad(float(self._counter), self.phiFrom, self.phiTo-self.phiFrom, float(LegSmooth._duration) )
+			self.a = ease.easeInOutQuad(float(self._counter), self.aFrom, self.aTo-self.aFrom, float(LegSmooth._duration) )
+			self.b = ease.easeInOutQuad(float(self._counter), self.bFrom, self.bTo-self.bFrom, float(LegSmooth._duration) )
 
-			# on update le counter qui nous laisse une trace de notre position sur la courbe de ease
-
-			if self._counter < self._duration :
+			if self._counter < LegSmooth._duration :
 				self._counter += 1
 
-		#Moving motor with inherited methode to the computed value
-		super(LegSmooth, self).position(self.phi, self.a, self.b)
+			#Moving motor with inherited methode to the computed value
+			Leg.position(self, self.phi, self.a, self.b)
+		else:
+			Leg.position(self, self.phiTo, self.aTo, self.bTo)
+
+
+		
+		
 	
 
 

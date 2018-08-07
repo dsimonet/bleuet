@@ -17,26 +17,6 @@ class body :
 		time.sleep(0.25) #for avoiding tension drop due current call by all motor moving at the same time by reseting.
 
 
-	def Stand(self) :
-		for leg in LegSmooth:
-			leg.position(0, 40, 20)
-			
-
-		#Leg.waitUntilFinish()
-
-	def Up(self) :
-		for i in self.legRegistry :
-			i.position(0, -30, 20)
-
-		#Leg.waitUntilFinish()
-
-
-	def Down(self) :
-		for i in self.legRegistry :
-			i.position(0, 10, 20)
-
-		#Leg.waitUntilFinish()
-
 
 # excuted if this doc is not imported
 # for testing purpose only
@@ -61,20 +41,20 @@ if __name__ == '__main__':
 	bleuet.AddLeg(6,7,8) #arrière droit 2 
 	bleuet.AddLeg(3,4,5) #avant droit 3
 
-
 	LegSmooth.startThread()
 
 	#walkCycleRegistery = []
 	orientation = [1, 1, -1, -1]
 
-	legUp = [0,20]
+	legUp = [-10,20]
 	legDown = [20,45]
-	frontBack = [15,0,-15] # 0 = arrière, 1= middle, 2 =avant
+	frontBack = [20, 0, -20] # 0 = arrière, 1= middle, 2 =avant
 
 	def avancerPatte(_patte, _pose): # -1 = arrière, 0= middle, 1 =avant
 		return frontBack[_pose+1]*orientation[_patte]
 
-	LegSmooth.setSpeed(2)
+	LegSmooth.waitUntilFinish()
+	LegSmooth.setSpeed(8)
 
 	#Pose initial
 
@@ -126,13 +106,13 @@ if __name__ == '__main__':
 		bleuet.legRegistry[0].grab(legDown[0], legDown[1])
 		LegSmooth.waitUntilFinish()
 
+
 		#glisser vers l'avant
 		bleuet.legRegistry[0].orient(avancerPatte(0, 0)) #frontBack[0]*orientation[0]
 		bleuet.legRegistry[1].orient(avancerPatte(1, 0)) #frontBack[0]*orientation[1]
 		bleuet.legRegistry[2].orient(avancerPatte(2, -1)) #frontBack[1]*orientation[1]
 		bleuet.legRegistry[3].orient(avancerPatte(3, -1)) #frontBack[1]*orientation[1]
 		LegSmooth.waitUntilFinish()
-
 
 		#rammener une patte
 		bleuet.legRegistry[2].grab(legUp[0], legUp[1])

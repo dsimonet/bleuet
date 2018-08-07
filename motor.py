@@ -92,24 +92,3 @@ class motor :
 		self.ctrl_max_value = temp
 
 		self.computeScaleValue()
-
-#excuted if this doc is not imported
-# for testing purpose only
-if __name__ == '__main__':
-
-	import time
-
-	phi = motor(0)
-	motA = motor(1)
-	motB = motor(2)
-	motB.reverseMotor()
-
-	for i in range(-50,50):
-		phi.move(i)
-		motA.move(i)
-		motB.move(i)
-		time.sleep(0.1)
-
-	phi.move(10)
-	motA.move(10)
-	motB.move(10)
