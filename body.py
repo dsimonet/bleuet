@@ -5,18 +5,40 @@ from legSmooth import *
 import time
 
 
-class body :
+class Body :
+
+	legUp = [-10,20] #value for motor A & B
+	legDown = [20,45] #value for motor A & B
 
 	def __init__ (self) :
 		self.legRegistry = []
-
-
+		self.legOrientationRegistery = []
 
 	def AddLeg(self, _phi, _A, _B, _orient=0):
 		self.legRegistry.append(LegSmooth(_phi, _A, _B))
+		self.legOrientationRegistery.append(_orient)
 		time.sleep(0.25) #for avoiding tension drop due current call by all motor moving at the same time by reseting.
 
+	def getSide(self, _leg):
+		if self.legOrientationRegistery[_leg] < 180 :
+			return 1
+		else:
+			return -1
 
+	def ReOrient(self, _degre):
+		for v in range(0, len(self.legOrientationRegistery)) :
+			self.legOrientationRegistery[v] += _degre
+			self.legOrientationRegistery[v] %= 360
+		
+	def LegUp(self, _leg):
+		self.legRegistry[_leg].grab(Body.legUp[0], Body.legUp[1])
+
+	def LegDown(self, _leg):
+		self.legRegistry[_leg].grab(Body.legDown[0], Body.legDown[1])
+
+	def LegOrient(self, _leg, _degre):
+		a = _degre * self.getSide(_leg)
+		self.legRegistry[_leg].orient(a)
 
 # excuted if this doc is not imported
 # for testing purpose only
@@ -24,7 +46,6 @@ if __name__ == '__main__':
 
 	import time
 	import random
-	from body import *
 
 	##############################################
 	# MAIN
@@ -32,95 +53,97 @@ if __name__ == '__main__':
 
 
 	#create our robot
-	bleuet = body()
+	bleuet = Body()
 
 	# instanciate leg in counter-clockwise  direction
+	#with orientation
 
-	bleuet.AddLeg(0,1,2) #avant gauche 0
-	bleuet.AddLeg(9,10,11) #arrière gauche 1 
-	bleuet.AddLeg(6,7,8) #arrière droit 2 
-	bleuet.AddLeg(3,4,5) #avant droit 3
+	bleuet.AddLeg(0,1,2,   60) #avant gauche 0
+	bleuet.AddLeg(9,10,11, 120) #arrière gauche 1 
+	bleuet.AddLeg(6,7,8,   240) #arrière droit 2 
+	bleuet.AddLeg(3,4,5,   300) #avant droit 3
 
 	LegSmooth.startThread()
 
-	#walkCycleRegistery = []
-	orientation = [1, 1, -1, -1]
-
-	legUp = [-10,20]
-	legDown = [20,45]
-	frontBack = [20, 0, -20] # 0 = arrière, 1= middle, 2 =avant
-
-	def avancerPatte(_patte, _pose): # -1 = arrière, 0= middle, 1 =avant
-		return frontBack[_pose+1]*orientation[_patte]
 
 	LegSmooth.waitUntilFinish()
 	LegSmooth.setSpeed(8)
 
 	#Pose initial
 
-	bleuet.legRegistry[0].orient(avancerPatte(0, 0) )
-	bleuet.legRegistry[1].orient(avancerPatte(1, 0) )
-	bleuet.legRegistry[2].orient(avancerPatte(2, 1))
-	bleuet.legRegistry[3].orient(avancerPatte(3, -1))
-	LegSmooth.waitUntilFinish()
+	#frontBack = [15, 0, -15] # tree values for phi motor Front, middle, back
+	legValueFront = -15 #frontBack[0]
+	legValueMiddle = 0 #frontBack[1]
+	legValueBack = 15  #frontBack[2]
 
-	for leg in LegSmooth :
-		leg.grab(legDown[0], legDown[1])
+
+	#bleuet.ReOrient(+90)
+
+
+	# bleuet.LegOrient( 0, legValueMiddle)
+	# bleuet.LegOrient( 1, legValueMiddle)
+	# bleuet.LegOrient( 2, legValueFront)
+	# bleuet.LegOrient( 3, legValueBack)
+	# LegSmooth.waitUntilFinish()
+
+	for leg in range(0,len(bleuet.legRegistry)) :
+		bleuet.LegDown(leg)
 	LegSmooth.waitUntilFinish()
 
 	# ------
 
-	for r in range(0,10):
+	for r in range(0,8):
 
-		#Avancer une patte
-		bleuet.legRegistry[3].grab(legUp[0], legUp[1])
-		LegSmooth.waitUntilFinish()
-		bleuet.legRegistry[3].orient(avancerPatte(3, 1)) 
-		LegSmooth.waitUntilFinish()
-		bleuet.legRegistry[3].grab(legDown[0], legDown[1])
-		LegSmooth.waitUntilFinish()
 
+		#find lowest leg 
+		firstLeg = bleuet.legOrientationRegistery.index(min(bleuet.legOrientationRegistery))
 
 		#glisser vers l'avant
-		bleuet.legRegistry[0].orient(avancerPatte(0, -1)) #frontBack[0]*orientation[0]
-		bleuet.legRegistry[1].orient(avancerPatte(1, -1)) #frontBack[0]*orientation[1]
-		bleuet.legRegistry[2].orient(avancerPatte(2, 0)) #frontBack[1]*orientation[1]
-		bleuet.legRegistry[3].orient(avancerPatte(3, 0)) #frontBack[1]*orientation[1]
+		bleuet.LegOrient(0, legValueBack)
+		bleuet.LegOrient(1, legValueBack)
+		bleuet.LegOrient(2, legValueMiddle)
+		bleuet.LegOrient(3, legValueMiddle)
+		LegSmooth.waitUntilFinish()
+
+		#rammener l'autre patte patte
+		bleuet.LegUp(1) 
+		LegSmooth.waitUntilFinish()
+		bleuet.LegOrient(1, legValueFront)  
+		LegSmooth.waitUntilFinish()
+		bleuet.LegDown(1)
+		LegSmooth.waitUntilFinish()
+
+		#Avancer une patte
+		bleuet.LegUp(0) 
+		LegSmooth.waitUntilFinish()
+		bleuet.LegOrient(0, legValueFront)
+		LegSmooth.waitUntilFinish()
+		bleuet.LegDown(0)
+		LegSmooth.waitUntilFinish()
+
+		#glisser vers l'avant
+		bleuet.LegOrient(0, legValueMiddle)
+		bleuet.LegOrient(1, legValueMiddle)
+		bleuet.LegOrient(2, legValueBack)
+		bleuet.LegOrient(3, legValueBack)
 		LegSmooth.waitUntilFinish()
 
 		#rammener une patte
-		bleuet.legRegistry[1].grab(legUp[0], legUp[1])
+		bleuet.LegUp(2) 
 		LegSmooth.waitUntilFinish()
-		bleuet.legRegistry[1].orient(avancerPatte(1, 1)) 
+		bleuet.LegOrient(2, legValueFront)
 		LegSmooth.waitUntilFinish()
-		bleuet.legRegistry[1].grab(legDown[0], legDown[1])
+		bleuet.LegDown(2) 
 		LegSmooth.waitUntilFinish()
-
-		# --
 
 		#Avancer une patte
-		bleuet.legRegistry[0].grab(legUp[0], legUp[1])
+		bleuet.LegUp(3) 
 		LegSmooth.waitUntilFinish()
-		bleuet.legRegistry[0].orient(avancerPatte(0, 1)) 
+		bleuet.LegOrient(3, legValueFront)  
 		LegSmooth.waitUntilFinish()
-		bleuet.legRegistry[0].grab(legDown[0], legDown[1])
-		LegSmooth.waitUntilFinish()
-
-
-		#glisser vers l'avant
-		bleuet.legRegistry[0].orient(avancerPatte(0, 0)) #frontBack[0]*orientation[0]
-		bleuet.legRegistry[1].orient(avancerPatte(1, 0)) #frontBack[0]*orientation[1]
-		bleuet.legRegistry[2].orient(avancerPatte(2, -1)) #frontBack[1]*orientation[1]
-		bleuet.legRegistry[3].orient(avancerPatte(3, -1)) #frontBack[1]*orientation[1]
+		bleuet.LegDown(3)
 		LegSmooth.waitUntilFinish()
 
-		#rammener une patte
-		bleuet.legRegistry[2].grab(legUp[0], legUp[1])
-		LegSmooth.waitUntilFinish()
-		bleuet.legRegistry[2].orient(avancerPatte(2, 1)) 
-		LegSmooth.waitUntilFinish()
-		bleuet.legRegistry[2].grab(legDown[0], legDown[1])
-		LegSmooth.waitUntilFinish()
 
 
 	#Clean end	

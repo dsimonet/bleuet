@@ -34,12 +34,13 @@ class LegSmooth(Leg) :
 
 	@staticmethod
 	def startThread():
-		LegSmooth._timer = Intervallometre(0.001, LegSmooth.updateSoftAll)
+		LegSmooth._timer = Intervallometre(0.002, LegSmooth.updateSoftAll)
 		LegSmooth._timer.setDaemon(True)
 		LegSmooth._timer.start()
 		time.sleep(0.1)
 
 	@staticmethod
+
 	def setSpeed(v):
 		for leg in LegSmooth:
 			leg.phiFrom = leg.phi
