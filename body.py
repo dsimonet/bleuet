@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
 
 	LegSmooth.waitUntilFinish()
-	LegSmooth.setSpeed(8)
+	LegSmooth.setSpeed(0)
 
 	#Pose initial
 
