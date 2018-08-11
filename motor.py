@@ -47,7 +47,6 @@ class motor :
 		self.ctrl_min_value = min
 		self.ctrl_max_value = max
 		self.computeScaleValue()
-		return [self.ctrl_min_value, self.ctrl_max_value]
 
 	def setMinMaxOutput(self, min, max):
 		self.servo_min = min
