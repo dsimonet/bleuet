@@ -44,13 +44,14 @@ class motor :
 
 	#tweaking methodes values
 	def setMinMaxInput(self, min, max):
-		motor.ctrl_min_value = min
-		motor.ctrl_max_value = max
+		self.ctrl_min_value = min
+		self.ctrl_max_value = max
 		self.computeScaleValue()
+		return [self.ctrl_min_value, self.ctrl_max_value]
 
 	def setMinMaxOutput(self, min, max):
-		motor.servo_min = min
-		motor.servo_max = max
+		self.servo_min = min
+		self.servo_max = max
 		self.computeScaleValue()
 
 	def move(self, v):
@@ -83,7 +84,7 @@ class motor :
 		self.move(self.ctrl_min_value + (self.ctrl_max_value-self.ctrl_min_value)/2 )
 
 	def computeScaleValue(self):
-		self.preComputedScaleValue =  (self.servo_max - self.servo_min) / (self.ctrl_max_value - self.ctrl_min_value)
+		self.preComputedScaleValue = (self.servo_max - self.servo_min) / (self.ctrl_max_value - self.ctrl_min_value)
 
 	# change side mouvement of motor
 	def reverseMotor(self):
