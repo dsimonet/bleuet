@@ -326,7 +326,7 @@ if __name__ == '__main__':
 
 	from motor import *
 	import time
-	from ..sbus_driver_python import *
+	from sbus_driver_python import SBUSReceiver
 
 
 	sbus = SBUSReceiver('/dev/ttyS0')
@@ -354,9 +354,9 @@ if __name__ == '__main__':
 
 
 		if sbus.get_rx_channels()[4] >= 512 and sbus.isSync:
-			a = remap(sbus.get_rx_channels()[0], 160, 1850, 90,-90)
+			a = convert(sbus.get_rx_channels()[0], 160, 1850, 90,-90)
 			b = a
-			phi = remap(sbus.get_rx_channels()[1], 160, 1850, -90,90) 
+			phi = convert(sbus.get_rx_channels()[1], 160, 1850, -90,90) 
 			
 			leg_1.position(phi,a,b)
 
