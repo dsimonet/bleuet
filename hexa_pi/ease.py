@@ -10,12 +10,14 @@
 #on calcul la position actuel avec une fonction ease
 #ease(t, b, c, d)
 # t is the current time (or position) of the tween.
+# (a if needed is the minimal value of input)
 # b is the beginning value of the property.
 # c is the change between the beginning and destination value of the property.
 # d is the total time of the tween.
 
 import math
 
+remap = lambda t, a, b, c, d : c + (t - a) * (d - c) / (b - a)
 linearTween = lambda t, b, c, d : c*t/d + b
 
 def easeInQuad(t, b, c, d):
