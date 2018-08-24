@@ -7,6 +7,8 @@
 #from __future__ import division
 
 from motor import *
+from intervallometre import *
+import ease
 
 #see here https://stackoverflow.com/questions/739882/iterating-over-object-instances-of-a-given-class-in-python
 class IterRegistry(type):
