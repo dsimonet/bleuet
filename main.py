@@ -3,62 +3,73 @@
 
 import time
 import random
-from body import *
+
 
 ##############################################
 # MAIN
 ##############################################
 
 
-body = body()
-
-body.Down()
-time.sleep(1)
-body.Up()
-time.sleep(1)
-body.Down()
-time.sleep(1)
-body.Stand()
 
 
+# excuted if this doc is not imported
+# for testing purpose only
+if __name__ == '__main__':
 
-"""
-#on init les objet patte avec l'assignation du bus (pas encore codé) et la pin ou est branché le servo (x3)
-patte_0 = Patte(0,0,1,2)
-patte_1 = Patte(0,4,5,6)
-patte_2 = Patte(0,8,9,10)
-
-Patte.speed(16)
-
-#on init le system de mise à jour des pattes
-
-t =  Intervallometre(0.008, Patte.updateAll)
-t.setDaemon(True)
-t.start()
+	from hexa_pi import *
+	from sbus_driver_python import *
 
 
-while 1 :
-	Patte.allPosition(50,90,0)
-	Patte.waitUntilFinish()
+	sbus = SBUSReceiver('/dev/ttyS0')
 
-	Patte.allPosition(50,80,10)
-	Patte.waitUntilFinish()
+	# init leg
 
-	Patte.allPosition(50,90,0)
-	Patte.waitUntilFinish()
+	leg_1 = LegSmooth(0,1,2)
+	leg_1.mot_phi.reverseMotor()
 
-	Patte.allPosition(50,5,70)
-	Patte.waitUntilFinish()
 
-#on stop le Thread
-#et on range tout
-Patte.waitUntilFinish()
-Patte.speed(16)
-for p in Patte._registry :
-	p.standPosition()
-Patte.waitUntilFinish()
+	#init Thread LEG
 
-t.stop()
-time.sleep(0.2)
+	LegSmooth.setSpeed(4)
+	LegSmooth.startThread()
+	LegSmooth.waitUntilFinish()
+	
+	#make leg move to a position in x y z global (hexapod local)
 
-"""
+	time.sleep(1)
+
+	timer1 = time.time()
+	timer2 = time.time()+0.1
+
+	while True:
+
+
+		if sbus.get_rx_channels()[4] >= 512 and sbus.isSync:
+			a = remap(sbus.get_rx_channels()[0], 160, 1850, 90,-90)
+			b = a
+			phi = remap(sbus.get_rx_channels()[1], 160, 1850, -90,90) 
+			
+			leg_1.position(phi,a,b)
+
+
+		if time.time() - timer1 > 0.01:
+			sbus.get_new_data()
+			timer1 = time.time()
+
+		if time.time() - timer2 > 0.2:
+			#print a,b, phi
+			timer2 = time.time()
+
+
+
+	# leg_2.position(-85,0,60)
+	# leg_3.position(85,-85,60)
+	# leg_4.position(85,0,60)
+	
+	LegIK.waitUntilFinish()
+
+	#Clean end	
+	time.sleep(0.5)
+	LegSmooth.closeThread()
+	time.sleep(0.2)
+	#LegIK.offAllLegSmooth()
