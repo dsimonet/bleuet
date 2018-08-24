@@ -67,84 +67,88 @@ if __name__ == '__main__':
 
 
 	LegSmooth.waitUntilFinish()
-	LegSmooth.setSpeed(0)
+	LegSmooth.setSpeed(4)
 
 	#Pose initial
 
 	#frontBack = [15, 0, -15] # tree values for phi motor Front, middle, back
-	legValueFront = -15 #frontBack[0]
-	legValueMiddle = 0 #frontBack[1]
-	legValueBack = 15  #frontBack[2]
+	legValueFront = 0 #frontBack[0] -15
+	legValueMiddle = 0 #frontBack[1]	0
+	legValueBack = 25  #frontBack[2]	15
 
 
-	#bleuet.ReOrient(+90)
+	for rr in range(0,4) :
 
-
-	# bleuet.LegOrient( 0, legValueMiddle)
-	# bleuet.LegOrient( 1, legValueMiddle)
-	# bleuet.LegOrient( 2, legValueFront)
-	# bleuet.LegOrient( 3, legValueBack)
-	# LegSmooth.waitUntilFinish()
-
-	for leg in range(0,len(bleuet.legRegistry)) :
-		bleuet.LegDown(leg)
-	LegSmooth.waitUntilFinish()
-
-	# ------
-
-	for r in range(0,8):
-
-
-		#find lowest leg 
-		firstLeg = bleuet.legOrientationRegistery.index(min(bleuet.legOrientationRegistery))
-
-		#glisser vers l'avant
-		bleuet.LegOrient(0, legValueBack)
-		bleuet.LegOrient(1, legValueBack)
-		bleuet.LegOrient(2, legValueMiddle)
-		bleuet.LegOrient(3, legValueMiddle)
+		bleuet.LegOrient( 0, legValueMiddle)
+		bleuet.LegOrient( 1, legValueMiddle)
+		bleuet.LegOrient( 2, legValueFront)
+		bleuet.LegOrient( 3, legValueBack)
 		LegSmooth.waitUntilFinish()
 
-		#rammener l'autre patte patte
-		bleuet.LegUp(1) 
-		LegSmooth.waitUntilFinish()
-		bleuet.LegOrient(1, legValueFront)  
-		LegSmooth.waitUntilFinish()
-		bleuet.LegDown(1)
+		for leg in range(0,len(bleuet.legRegistry)) :
+			bleuet.LegDown(leg)
 		LegSmooth.waitUntilFinish()
 
-		#Avancer une patte
-		bleuet.LegUp(0) 
-		LegSmooth.waitUntilFinish()
-		bleuet.LegOrient(0, legValueFront)
-		LegSmooth.waitUntilFinish()
-		bleuet.LegDown(0)
-		LegSmooth.waitUntilFinish()
+		# ------
 
-		#glisser vers l'avant
-		bleuet.LegOrient(0, legValueMiddle)
-		bleuet.LegOrient(1, legValueMiddle)
-		bleuet.LegOrient(2, legValueBack)
-		bleuet.LegOrient(3, legValueBack)
-		LegSmooth.waitUntilFinish()
-
-		#rammener une patte
-		bleuet.LegUp(2) 
-		LegSmooth.waitUntilFinish()
-		bleuet.LegOrient(2, legValueFront)
-		LegSmooth.waitUntilFinish()
-		bleuet.LegDown(2) 
-		LegSmooth.waitUntilFinish()
-
-		#Avancer une patte
-		bleuet.LegUp(3) 
-		LegSmooth.waitUntilFinish()
-		bleuet.LegOrient(3, legValueFront)  
-		LegSmooth.waitUntilFinish()
-		bleuet.LegDown(3)
-		LegSmooth.waitUntilFinish()
+		for r in range(0,3):
 
 
+			#find lowest leg 
+			newLeg = []
+			firstLeg = bleuet.legOrientationRegistery.index(min(bleuet.legOrientationRegistery))
+			for i in range(0, len(bleuet.legOrientationRegistery)) :
+				newLeg.append( (firstLeg+i)%(len(bleuet.legOrientationRegistery)) )
+
+
+			#glisser vers l'avant
+			bleuet.LegOrient(newLeg[0], legValueBack)
+			bleuet.LegOrient(newLeg[1], legValueBack)
+			bleuet.LegOrient(newLeg[2], legValueMiddle)
+			bleuet.LegOrient(newLeg[3], legValueMiddle)
+			LegSmooth.waitUntilFinish()
+
+			#rammener l'autre patte patte
+			bleuet.LegUp(newLeg[1]) 
+			LegSmooth.waitUntilFinish()
+			bleuet.LegOrient(newLeg[1], legValueFront) 
+			LegSmooth.waitUntilFinish()
+			bleuet.LegDown(newLeg[1])
+			LegSmooth.waitUntilFinish()
+
+			#Avancer une patte
+			bleuet.LegUp(newLeg[0]) 
+			LegSmooth.waitUntilFinish()
+			bleuet.LegOrient(newLeg[0], legValueFront)
+			LegSmooth.waitUntilFinish()
+			bleuet.LegDown(newLeg[0])
+			LegSmooth.waitUntilFinish()
+
+
+			#glisser vers l'avant
+			bleuet.LegOrient(newLeg[0], legValueMiddle)
+			bleuet.LegOrient(newLeg[1], legValueMiddle)
+			bleuet.LegOrient(newLeg[2], legValueBack)
+			bleuet.LegOrient(newLeg[3], legValueBack)
+			LegSmooth.waitUntilFinish()
+
+			#rammener une patte
+			bleuet.LegUp(newLeg[2]) 
+			LegSmooth.waitUntilFinish()
+			bleuet.LegOrient(newLeg[2], legValueFront)
+			LegSmooth.waitUntilFinish()
+			bleuet.LegDown(newLeg[2]) 
+			LegSmooth.waitUntilFinish()
+
+			#Avancer une patte
+			bleuet.LegUp(newLeg[3]) 
+			LegSmooth.waitUntilFinish()
+			bleuet.LegOrient(newLeg[3], legValueFront)  
+			LegSmooth.waitUntilFinish()
+			bleuet.LegDown(newLeg[3])
+			LegSmooth.waitUntilFinish()
+
+		bleuet.ReOrient(+90)
 
 	#Clean end	
 	time.sleep(1)

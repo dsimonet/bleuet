@@ -6,7 +6,7 @@
 
 #from __future__ import division
 
-from motor import motor
+from motor import *
 
 #see here https://stackoverflow.com/questions/739882/iterating-over-object-instances-of-a-given-class-in-python
 class IterRegistry(type):
@@ -29,9 +29,9 @@ class Leg() :
 		self.side = True #True =  "normal" & False = "reverse"
 
 		# Instanciate motor class for each par of leg
-		self.mot_phi = motor(_phi)
-		self.mot_A = motor(_A)
-		self.mot_B = motor(_B)
+		self.mot_phi = Motor(_phi)
+		self.mot_A = Motor(_A)
+		self.mot_B = Motor(_B)
 
 		self.mot_A.reverseMotor()
 		
