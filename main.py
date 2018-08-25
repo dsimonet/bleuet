@@ -18,19 +18,19 @@ if __name__ == '__main__':
 
 	from hexa_pi import *
 	from sbus_driver_python import *
-
+	from hexa_pi import intervallometre
 
 	sbus = SBUSReceiver('/dev/ttyS0')
 
 	# init leg
 
-	leg_1 = LegSmooth(0,1,2)
+	leg_1 = LegIK(0,1,2, 30)
 	leg_1.mot_phi.reverseMotor()
 
 
 	#init Thread LEG
 
-	LegSmooth.setSpeed(4)
+	LegSmooth.setSpeed(2)
 	LegSmooth.startThread()
 	LegSmooth.waitUntilFinish()
 	
@@ -43,21 +43,18 @@ if __name__ == '__main__':
 
 	while True:
 
+		z = remap(sbus.get_rx_channels()[0], 160, 1850, -40,40)
+		x = remap(sbus.get_rx_channels()[3], 160, 1850, 0,50) 
+		y = remap(sbus.get_rx_channels()[2], 160, 1850, 0,50) 
 
-		if sbus.get_rx_channels()[4] >= 512 and sbus.isSync:
-			a = remap(sbus.get_rx_channels()[0], 160, 1850, 90,-90)
-			b = a
-			phi = remap(sbus.get_rx_channels()[1], 160, 1850, -90,90) 
-			
-			leg_1.position(phi,a,b)
-
-
-		if time.time() - timer1 > 0.01:
+		if time.time() - timer1 > 0.001:
 			sbus.get_new_data()
 			timer1 = time.time()
+			if sbus.get_rx_channels()[4] >= 512:
+				leg_1.position(z,z,z)
 
-		if time.time() - timer2 > 0.2:
-			#print a,b, phi
+		if time.time() - timer2 > 0.02:
+			print z
 			timer2 = time.time()
 
 

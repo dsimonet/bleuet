@@ -7,8 +7,6 @@
 #from __future__ import division
 
 from motor import *
-from intervallometre import *
-import ease
 
 #see here https://stackoverflow.com/questions/739882/iterating-over-object-instances-of-a-given-class-in-python
 class IterRegistry(type):
@@ -80,6 +78,9 @@ class Leg() :
 """	LEG SMOOTH """
 ######################
 
+from intervallometre import *
+import ease
+
 class LegSmooth(Leg) :
 
 	_duration = 16
@@ -112,7 +113,6 @@ class LegSmooth(Leg) :
 		time.sleep(0.1)
 
 	@staticmethod
-
 	def setSpeed(v):
 		for leg in LegSmooth:
 			leg.phiFrom = leg.phi
@@ -233,6 +233,8 @@ class LegSmooth(Leg) :
 		#print pointXside, pointYside
 
 
+import math
+
 class LegIK (LegSmooth):
 
 	robotReverse = 1 #1 for normal side and -1 for reverse
@@ -276,13 +278,11 @@ class LegIK (LegSmooth):
 
 	def position(self,_x,_y,_z):
 
-
-
 		#computing Orientation of the leg
 		#math.atan2(y, x) result -pi to pi 
 		goalOrient = math.degrees(math.atan2(math.fabs(_y),math.fabs(_x)))
-		goalOrientCorrected = goalOrient - self.orient
-		print "goalOrientCorrected",goalOrientCorrected
+		goalOrientCorrected = self.orient - goalOrient
+		#print "goalOrientCorrected",goalOrientCorrected
 
 
 		#now have to resolve 2 angles of femur & coxa and tibia & femur 
