@@ -78,7 +78,6 @@ class Leg() :
 """	LEG SMOOTH """
 ######################
 
-from intervallometre import *
 import ease
 
 class LegSmooth(Leg) :
@@ -104,14 +103,6 @@ class LegSmooth(Leg) :
 		self.aTo = self.a
 		self.bTo = self.b 	
 
-
-	@staticmethod
-	def startThread():
-		LegSmooth._timer = Intervallometre(0.002, LegSmooth.updateSoftAll)
-		LegSmooth._timer.setDaemon(True)
-		LegSmooth._timer.start()
-		time.sleep(0.1)
-
 	@staticmethod
 	def setSpeed(v):
 		for leg in LegSmooth:
@@ -125,10 +116,6 @@ class LegSmooth(Leg) :
 			leg._counter = v
 
 		LegSmooth._duration = v
-	
-	@staticmethod
-	def closeThread():
-		LegSmooth._timer.stop()
 
 	@staticmethod
 	def offAllLegSmooth():
