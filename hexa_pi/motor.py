@@ -16,16 +16,20 @@ import Adafruit_PCA9685
 class Motor :
 
 	#library who drive motor in low level I2C
-	pwm = Adafruit_PCA9685.PCA9685()
-
-
-	# in calculation of move, some ratio value are calculate a every move but not change
-	# so we added a précalculate value of them
-	preComputedScaleValue = None
+	pwm = Adafruit_PCA9685.PCA9685() 
 
 	def __init__ (self, _pin, freq=60):
+
+		#motor bus and pin
+		self.bus = int(_pin/16) # int 64 = 0x40 in hex
+		# for i in xrange(self.bus):
+		# 	if not len(Motor.pwm) < self.bus:
+		# 		Motor.pwm.append( Adafruit_PCA9685.PCA9685() )
+		
 		Motor.pwm.set_pwm_freq(freq)
-		self.pin = _pin
+		self.pin = _pin - 16*self.bus
+
+		#motor position
 		self.value = None	#last position received 
 		self.position = None	#last position sent
 
@@ -85,3 +89,27 @@ class Motor :
 		temp = self.ctrl_min_value
 		self.ctrl_min_value = self.ctrl_max_value
 		self.ctrl_max_value = temp
+
+
+
+# excuted if this doc is not imported
+# for testing purpose only
+if __name__ == '__main__':
+
+	import time
+	import binascii
+
+	m1 = Motor(1)
+	#print "bus", m1.bus, "pin", m1.pin, Motor.pwm[0]._device._address
+
+	m2 = Motor(17)
+	#print "bus", m2.bus, "pin", m2.pin, Motor.pwm[1]._device._address
+
+	print Motor.pwm
+
+	m1.move(-60)
+	m2.move(-60)
+	time.sleep(0.3)
+	m1.move(60)
+	m2.move(60)
+	time.sleep(0.3)
