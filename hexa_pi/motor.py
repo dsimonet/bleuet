@@ -16,17 +16,22 @@ import Adafruit_PCA9685
 class Motor :
 
 	#library who drive motor in low level I2C
-	pwm = Adafruit_PCA9685.PCA9685() 
+	pwm = [ Adafruit_PCA9685.PCA9685() ]
 
 	def __init__ (self, _pin, freq=60):
+		"""
+		pin goes from 0 to 15 for bus 1 and for each group of 16 next values
+		bus is automaticali incremented by one
+		start address is 0x40 (d64) next is 0x41 (d65) etc.
+		"""
 
 		#motor bus and pin
 		self.bus = int(_pin/16) # int 64 = 0x40 in hex
-		# for i in xrange(self.bus):
-		# 	if not len(Motor.pwm) < self.bus:
-		# 		Motor.pwm.append( Adafruit_PCA9685.PCA9685() )
+		for i in xrange(self.bus):
+			if not len(Motor.pwm) < self.bus:
+				Motor.pwm.append( Adafruit_PCA9685.PCA9685(64+self.bus) )
 		
-		Motor.pwm.set_pwm_freq(freq)
+		Motor.pwm[self.bus].set_pwm_freq(freq)
 		self.pin = _pin - 16*self.bus
 
 		#motor position
@@ -58,7 +63,7 @@ class Motor :
 	def move(self, v):
 		self.value = v
 		self.position =  self.servo_min + (v - self.ctrl_min_value) * (self.servo_max - self.servo_min) / (self.ctrl_max_value - self.ctrl_min_value) 
-		Motor.pwm.set_pwm(self.pin, 1, int(self.position) )
+		Motor.pwm[self.bus].set_pwm(self.pin, 1, int(self.position) )
 
 	def safeMove(self, v):
 		if v < self.ctrl_min_value:
@@ -71,11 +76,11 @@ class Motor :
 	# use with caution can block or damage motor if set PWM value under move capability
 	#but reconized by servo as valid move (not in off range)
 	def moveRaw(self, v):
-		Motor.pwm.set_pwm(self.pin, 1, int(v) )
+		Motor.pwm[self.bus].set_pwm(self.pin, 1, int(v) )
 	
 	#value between dead zone make motor off. 0 & 0 make pwm ratio to zero so motor stop
 	def off(self):
-		Motor.pwm.set_pwm(self.pin, 0, 0)
+		Motor.pwm[self.bus].set_pwm(self.pin, 0, 0)
 	#get back the inital value
 	def on(self) :
 		self.move(self.value)
@@ -99,17 +104,17 @@ if __name__ == '__main__':
 	import time
 	import binascii
 
-	m1 = Motor(1)
+	m1 = Motor(0)
 	#print "bus", m1.bus, "pin", m1.pin, Motor.pwm[0]._device._address
 
-	m2 = Motor(17)
+	m2 = Motor(16)
 	#print "bus", m2.bus, "pin", m2.pin, Motor.pwm[1]._device._address
 
 	print Motor.pwm
 
 	m1.move(-60)
-	m2.move(-60)
+	m2.move(60)
 	time.sleep(0.3)
 	m1.move(60)
-	m2.move(60)
+	m2.move(-60)
 	time.sleep(0.3)
