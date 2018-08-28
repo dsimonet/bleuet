@@ -144,7 +144,7 @@ class LegSmooth(Leg) :
 		return True
 
 	@staticmethod
-	def updateSoftAll():
+	def updateAll():
 		for leg in LegSmooth:
 			leg.updateSoft()
 

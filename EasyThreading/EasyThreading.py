@@ -16,6 +16,8 @@ class NewThread(threading.Thread):
         self.args = args
         self.kwargs = kwargs
         self.encore = True  # pour permettre l'arret a la demande
+
+        time.sleep(0.1)
  
     def run(self):
         while self.encore:
@@ -28,3 +30,34 @@ class NewThread(threading.Thread):
         self.encore = False  # pour empecher un nouveau lancement de Timer et terminer le thread
         if self.timer.isAlive():
             self.timer.cancel()  # pour terminer une eventuelle attente en cours de Timer
+
+        time.sleep(0.1)
+
+
+
+
+
+"""
+
+t =  Intervallometre(duree, affiche, ["toto"], {'x':"titi", 'y':"tata"})
+t.setDaemon(True)
+t.start()
+ 
+time.sleep(5.1)
+t.stop()
+ 
+t2 =  Intervallometre(duree, affiche2, ["toto2"], {'x':"titi", 'y':"tata"})
+t2.setDaemon(True)
+t2.start()
+ 
+time.sleep(5.1)
+t2.stop()
+ 
+t3 =  Intervallometre(duree, affiche3, ["toto3"], {'x':"titi", 'y':"tata"})
+t3.setDaemon(True)
+t3.start()
+ 
+time.sleep(5.1)
+t3.stop()
+
+"""
