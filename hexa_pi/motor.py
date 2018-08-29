@@ -26,7 +26,7 @@ class Motor :
 		"""
 
 		#motor bus and pin
-		self.bus = int(_pin/16) # int 64 = 0x40 in hex
+		self.bus = int(_pin//16) # int 64 = 0x40 in hex
 		for i in xrange(self.bus):
 			if not len(Motor.pwm) < self.bus:
 				Motor.pwm.append( Adafruit_PCA9685.PCA9685(64+self.bus) )
