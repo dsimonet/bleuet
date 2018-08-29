@@ -79,6 +79,7 @@ class Leg() :
 ######################
 
 import ease
+import time
 
 class LegSmooth(Leg) :
 
@@ -149,6 +150,7 @@ class LegSmooth(Leg) :
 			leg.updateSoft()
 
 	def ready(self):
+		print self._counter, LegSmooth._duration
 		if self._counter == LegSmooth._duration :
 			return True
 		else:
