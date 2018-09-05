@@ -105,7 +105,7 @@ def easeInCirc(t, b, c, d):
 	return -c * (math.sqrt(1 - t*t) - 1) + b
 
 def easeOutCirc(t, b, c, d):
-	t /= d;
+	t /= d
 	t -= 1
 	return c * math.sqrt(1 - t*t) + b
 
