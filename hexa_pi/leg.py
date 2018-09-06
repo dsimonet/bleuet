@@ -28,7 +28,6 @@ class Leg() :
 		#register and iteration
 		Leg._registry.append(self)
 
-		self.side = True
 		self.name = "leg" + str(len(LegSmooth._registry))
 
 		# Instanciate motor class for each par of leg
@@ -36,7 +35,11 @@ class Leg() :
 		self.mot_A = Motor(_A)
 		self.mot_B = Motor(_B)
 
-		#self.mot_B.reverseMotor()
+		self.mot_B.reverseMotor()
+
+		self.side_Phi = True
+		self.side_A = True
+		self.side_B = True
 		
 
 	#METHODES STATICS
@@ -193,28 +196,33 @@ class LegSmooth(Leg) :
 		Set position of the leg by giving it 3 values
 		"""
 
-		if self.ready() :
-
-			self.phiFrom = self.phiValue
-			self.aFrom = self.aValue
-			self.bFrom = self.bValue
-
-			self.timeBegin = time.time()
-
-		else :
-			prevDone = time.time()-self.timeBegin
-			prevDuration = self.duration
-			pass#self.duration -= (time.time()-self.timeBegin)
-
-
+		#assign new goal value 
 		self.phiTo = _phi
 		self.aTo = _a
 		self.bTo = _b
 
 
-		#looking for distance max --> this move will be the longest and need to syncronyse
-		distList = [abs(self.phiTo - self.phiFrom), abs(self.aTo - self.aFrom), abs(self.bTo - self.bFrom)]
-		self.duration = float ( max(distList) / self.speed ) 
+		if self.ready() :
+			#if we are ready we can go for a trip from where we are
+			#so position and time are reseted and are our new starting point
+
+			self.timeBegin = time.time()
+
+			self.phiFrom = self.phiValue
+			self.aFrom = self.aValue
+			self.bFrom = self.bValue
+			
+			#looking for the longest distance we have to travel on each 3 motor. It's our duration for all 3 motors
+			distList = [abs(self.phiTo - self.phiFrom), abs(self.aTo - self.aFrom), abs(self.bTo - self.bFrom)]
+			self.duration = float ( max(distList) / self.speed ) 
+
+		else:
+			# else it's a bit triky. 
+			# we find the longest distance between *actual* position and to the new distance (it the trip we have to do)
+			distList = [abs(self.phiTo - self.phiValue), abs(self.aTo - self.aValue), abs(self.bTo - self.bValue)]
+			# and our new duration is the time we already done (cause we can't get it back), and duration between actual position and the new position
+			self.duration = time.time()-self.timeBegin + float ( max(distList) / self.speed ) 
+
 
 
 	def update(self):
