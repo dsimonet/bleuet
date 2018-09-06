@@ -200,6 +200,7 @@ class LegSmooth(Leg) :
 			self.bFrom = self.bValue
 
 			self.timeBegin = time.time()
+
 		else :
 			prevDone = time.time()-self.timeBegin
 			prevDuration = self.duration
@@ -211,9 +212,8 @@ class LegSmooth(Leg) :
 		self.bTo = _b
 
 
-
 		#looking for distance max --> this move will be the longest and need to syncronyse
-		distList = [abs(self.phiTo - self.phiValue), abs(self.aTo - self.aValue), abs(self.bTo - self.bValue)]
+		distList = [abs(self.phiTo - self.phiFrom), abs(self.aTo - self.aFrom), abs(self.bTo - self.bFrom)]
 		self.duration = float ( max(distList) / self.speed ) 
 
 
@@ -226,10 +226,6 @@ class LegSmooth(Leg) :
 		c is the change between the beginning and destination value of the property.
 		d is the total time of the tween.
 		"""
-		#print self.name, self.phiValue, "--->",
-		if self.name == "leg1" :
-			print time.time()-self.timeBegin
-			#print self.bValue, self.timeBegin, self.duration
 		
 		if (time.time()-self.timeBegin) < self.duration :
 			self.phiValue = ease.easeInOutQuad(time.time()-self.timeBegin, self.phiFrom, self.phiTo-self.phiFrom, self.duration) 
@@ -240,8 +236,6 @@ class LegSmooth(Leg) :
 			self.aValue = self.aTo
 			self.bValue = self.bTo
 
-
-		#print self.phiValue, " / ", self.phiTo, " (", (time.time()-self.timeBegin), "/", self.duration
 
 		#Moving motor with inherited methode to the computed value
 		Leg.position(self, self.phiValue, self.aValue, self.bValue)
