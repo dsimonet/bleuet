@@ -193,32 +193,26 @@ class LegSmooth(Leg) :
 		Set position of the leg by giving it 3 values
 		"""
 
-		self.phiFrom = self.phiValue
-		self.aFrom = self.aValue
-		self.bFrom = self.bValue
+		if self.ready() :
+
+			self.phiFrom = self.phiValue
+			self.aFrom = self.aValue
+			self.bFrom = self.bValue
+
+			self.timeBegin = time.time()
+		else :
+			prevDone = time.time()-self.timeBegin
+			prevDuration = self.duration
+			pass#self.duration -= (time.time()-self.timeBegin)
+
 
 		self.phiTo = _phi
 		self.aTo = _a
 		self.bTo = _b
 
-		if self.ready() :
-			self.timeBegin = time.time()
-
-		# lastJobDone = 0.0
-
-		# # if we have finish last travel
-		# if (time.time()-self.timeBegin) > self.duration :
-		# 	
-		# else :
-		# 	if self.duration > 0 :
-		# 		lastJobDone = time.time()-self.timeBegin
-		# 		self.timeBegin = time.time()-lastJobDone
-		# 		print lastJobDone, "/", self.duration
-		# #else
 
 
 		#looking for distance max --> this move will be the longest and need to syncronyse
-
 		distList = [abs(self.phiTo - self.phiValue), abs(self.aTo - self.aValue), abs(self.bTo - self.bValue)]
 		self.duration = float ( max(distList) / self.speed ) 
 
@@ -233,6 +227,9 @@ class LegSmooth(Leg) :
 		d is the total time of the tween.
 		"""
 		#print self.name, self.phiValue, "--->",
+		if self.name == "leg1" :
+			print time.time()-self.timeBegin
+			#print self.bValue, self.timeBegin, self.duration
 		
 		if (time.time()-self.timeBegin) < self.duration :
 			self.phiValue = ease.easeInOutQuad(time.time()-self.timeBegin, self.phiFrom, self.phiTo-self.phiFrom, self.duration) 
@@ -242,6 +239,7 @@ class LegSmooth(Leg) :
 			self.phiValue = self.phiTo
 			self.aValue = self.aTo
 			self.bValue = self.bTo
+
 
 		#print self.phiValue, " / ", self.phiTo, " (", (time.time()-self.timeBegin), "/", self.duration
 
