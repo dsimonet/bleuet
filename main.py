@@ -67,6 +67,8 @@ def walkCycle(h, v):
 
 	majorStep = 100.0/4.0
 	subStep =  majorStep/3.0
+	microStep = remap((v%majorStep)%subStep, 0, subStep, 0, 1)
+
 
 	upAPosition = 10
 	upBPosition = -80
@@ -78,9 +80,9 @@ def walkCycle(h, v):
 	#move odd leg
 	if v < majorStep :
 		if v < subStep :	#up
-			leg_1.position(phiBack,upAPosition,upBPosition)
-			leg_3.position(phiBack,upAPosition,upBPosition)
-			leg_5.position(-phiBack,upAPosition,upBPosition)
+			leg_1.position(phiBack,upAPosition*microStep,upBPosition*microStep)
+			leg_3.position(phiBack,upAPosition*microStep,upBPosition*microStep)
+			leg_5.position(-phiBack,upAPosition*microStep,upBPosition*microStep)
 		elif v < subStep*2 :	#front
 			leg_1.position(phiFront,upAPosition,upBPosition)
 			leg_3.position(phiFront,upAPosition,upBPosition)
@@ -163,7 +165,6 @@ if __name__ == '__main__':
 				if LegSmooth.allReady() :
 					walkStep += remap(sbus.get_rx_channels()[2], 172, 1811, -5, 5)
 					walkStep %= 100
-					print walkStep
 
 
 			#if Switch F is down and not receiver is not lost
