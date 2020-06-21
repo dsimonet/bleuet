@@ -37,7 +37,7 @@ class Motor :
 
 		#motor bus and pin
 		self.bus = int(_pin//16) # int 64 = 0x40 in hex
-		for i in xrange(self.bus):
+		for i in range(self.bus):
 			if not len(Motor.pwm) < self.bus:
 				Motor.pwm.append( Adafruit_PCA9685.PCA9685(64+self.bus) )
 		
@@ -62,6 +62,9 @@ class Motor :
 		self.side = True
 
 		self.reset()
+
+	def __del__(self):
+		off(self)
 
 	#tweaking methodes values
 	def setMinMaxInput(self, min, max):
@@ -123,7 +126,6 @@ class Motor :
 		# else :
 		# 	if side :
 		# 		self.reverseMotor()
-
 
 ######################
 """	MOTOR SMOOTH """
@@ -188,6 +190,19 @@ class MotorSmooth(Motor):
 	def isReady(self):
 		return time.time() >= (self.timeBegin + self.duration)
 
+	@staticmethod
+	def sync(*args):
+		# for any number of args
+		# seach  for the longest travel to do.
+		# and apply it to all the motorSmooth passed in args
+		maxValue = 0
+		for arg in args :
+			if  arg.duration > maxValue :	
+				maxValue = arg.duration
+		
+		for arg in args:
+			arg.duration = maxValue
+
 
 
 
@@ -206,14 +221,21 @@ if __name__ == '__main__':
 
 	try :
 		while True :
+			
+			#every 2 second we change position
 			if time.time()-timer0 >= 2:
 				m1.position(random.randint(-60,60))
 				m2.position(random.randint(-60,60))
 				m3.position(random.randint(-60,60))
+				
+				print(m1.goalValue, m2.goalValue, m3.goalValue)
+				
+				MotorSmooth.sync(m1, m2, m3)
 
 				timer0 = time.time()
 
-			if time.time()-timer1 >= 0.0001:
+			#every millis we update motor position
+			if time.time()-timer1 >= 0.001:
 				MotorSmooth.updateAll()
 				timer1 = time.time()
 

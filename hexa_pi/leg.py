@@ -90,12 +90,7 @@ class Leg() :
 """
 Increasing Speed should augment velocity or reduce time beetween the start and the arrive of position
 We have to keep trace of the last update. Like this mouvement will be calcultate over time/distance = speed and not just called where ever it want
-
-
-
 """
-
-
 
 import ease
 import time
@@ -137,7 +132,6 @@ class LegSmooth(Leg) :
 		self.bTo = 0.0
 
 		#Constant
-
 		self.position(0,0,0)
 
 	#METHODES STATICS
@@ -158,6 +152,7 @@ class LegSmooth(Leg) :
 		for leg in LegSmooth:
 			if not leg.ready() :
 				return False
+
 		return True
 
 	@staticmethod
@@ -179,6 +174,17 @@ class LegSmooth(Leg) :
 			distList.append( leg.duration )
 		for leg in LegSmooth :
 			leg.duration = max(distList)
+
+
+	@staticmethod
+	def setSpeedAll(value):
+		for leg in LegSmooth:
+			leg.setSpeed(value)
+
+	@staticmethod
+	def allOff() :
+		for leg in LegSmooth :
+			leg.off()
 
 
 	#METHODES
@@ -212,8 +218,9 @@ class LegSmooth(Leg) :
 			self.bFrom = self.bValue
 			
 			#looking for the longest distance we have to travel on each 3 motor. It's our duration for all 3 motors
-			distList = [abs(self.phiTo - self.phiFrom), abs(self.aTo - self.aFrom), abs(self.bTo - self.bFrom)]
-			self.duration = float ( max(distList) / self.speed ) 
+			# This is because all motor for each leg is sync. 
+			maxDuration = max( [abs(self.phiTo - self.phiFrom), abs(self.aTo - self.aFrom), abs(self.bTo - self.bFrom)] );
+			self.duration = float ( maxDuration ) / self.speed 
 
 		else:
 			# else it's a bit triky. 
@@ -256,117 +263,18 @@ class LegSmooth(Leg) :
 			return True
 
 
+	def isSoftLimiteActive(self, _v):
+		pass
 
-######################
-"""	LEG IK """
-######################
-
-# size in mm and angle in degrees or radian
-
-#			^  0°
-#	-x+y	|		+x+y
-#			|
-#			| XY origin
-#  90° -----R--------> 270°
-#			|
-#	-x-y	|		-y+x
-#			|
-#		   180°
-
-
-import math
-
-class LegIK (LegSmooth):
-
-	robotReverse = 1 #1 for normal side and -1 for reverse
-
-	def __init__(self, _phi, _A, _B, _orient=0):
-		LegSmooth.__init__(self, _phi, _A, _B)
-
-		#chain of parent to child is robot -> Coxa -> Femur -> tibia
-
-		#idea is to orient to coxa in direction of the goal
-		# and to solve in 2D angle of coxa to femur and femur to tibia to hit the goal
-
-		#pos of leg from robot origin
-		# and orientation from origin (front is 0°)
-		self.orient = _orient
-		self.posX = 0
-		self.posY = 0
-
-		self.minRot = -80
-		self.maxRot = 80
-
-		self.coxaZ = 11.15
-
-		self.coxaLen = 28.70
-		self.femurLen = 41.45
-		self.tibiaLen = 47.639
-
-	def SetOrient(self, degres):
-		self.orient = degres%360
-
-	def setPosition(self, _x, _y):
-		self.posX = _x
-		self.posY = _y
-
-	def getSide(self):
-		#side : 1 = left, -1 = right
-		if self.orient < 180 :
-			return 1
-		else:
-			return -1
-
-	def position(self,_x,_y,_z):
-
-		#computing Orientation of the leg
-		#math.atan2(y, x) result -pi to pi 
-		goalOrient = math.degrees(math.atan2(math.fabs(_y),math.fabs(_x)))
-		goalOrientCorrected = self.orient - goalOrient
-		#print "goalOrientCorrected",goalOrientCorrected
-
-
-		#now have to resolve 2 angles of femur & coxa and tibia & femur 
-		#but on the same plane.
-
-		#calculate height for coxa from floor (corrected by side of the robot)
-		heightCoxa = _z + self.coxaZ*LegIK.robotReverse
-		#print "height goal", heightCoxa
-		"""
-		#calculate air (or floor) distance bettween heightCoxa and goal
-		#it's position of robot&coxa axis  (2d) ---> distance (pythagore) minus coxa leng
-		lengGoal = math.sqrt( (x-self.posX)*(x-self.posX)+(y-self.posY)*(y-self.posY) ) - self.coxaLen
-		print "leng goal", lengGoal
-
-		#calculate 2D distance beetween goal on the floor and axis point of femur& coxa
-		distGoal = math.sqrt(  heightCoxa*heightCoxa+lengGoal*lengGoal ) 
-		print "dist goal", distGoal
-
-		# calculate angle beetween floor and distance ligne
-		angleDistCoxaHeight = math.degrees(math.acos(heightCoxa/distGoal))
-		print "angleDistCoxaHeight", angleDistCoxaHeight
-
-		angleGoalFemur = math.degrees(math.acos( (self.tibiaLen*self.tibiaLen - self.femurLen*self.femurLen - distGoal*distGoal)/(-2*self.femurLen*distGoal) ))
-		print "angleGoalFemur", angleGoalFemur
-
-		angleFemureCoxa = 90 - (angleDistCoxaHeight + angleGoalFemur)
-		print "angleFemureCoxa", angleFemureCoxa
-
-		angleFemurTibia =  math.degrees(math.acos(  (distGoal*distGoal-self.tibiaLen*self.tibiaLen-self.femurLen*self.femurLen)/(-2*self.tibiaLen*self.femurLen) ))
-		print "angleFemurTibia", angleFemurTibia
-
-		correctedAngleFemurTibia = 90 - angleFemurTibia
-		print "angleFemurTibia", angleFemurTibia
-		"""
-		LegSmooth.position(self, goalOrientCorrected,0,0)
-		#print "------"
-		return True
-
+	def setLimits(self, _minPhi, _maxPhi, _minA, _maxA, _minB, _maxB) : 
+		pass
 
 
 
 # excuted if this doc is not imported
 # for testing purpose only
+
+
 if __name__ == '__main__':
 
 	import random
@@ -378,7 +286,13 @@ if __name__ == '__main__':
 	leg_5 = LegSmooth(4, 5, 6)
 	leg_6 = LegSmooth(0, 1, 2)
 
-	LegSmooth.setAllSpeed(150)
+	LegSmooth.setSpeedAll(80)
+
+	for leg in LegSmooth :
+		leg.position(0,0,0)
+
+	while not LegSmooth.allReady() :
+		LegSmooth.updateAll()
 
 	try :
 		while True :
@@ -390,5 +304,16 @@ if __name__ == '__main__':
 			LegSmooth.updateAll()
 
 	except KeyboardInterrupt:
-		pass
+
+		for leg in LegSmooth :
+			leg.position(0,0,0)
+
+		while not LegSmooth.allReady() :
+			LegSmooth.updateAll()
+
+		time.sleep(1)
+
+		LegSmooth.allOff()
+
+		time.sleep(1)
 
