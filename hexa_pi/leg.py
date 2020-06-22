@@ -131,6 +131,10 @@ class LegSmooth(Leg) :
 		self.aTo = 0.0
 		self.bTo = 0.0
 
+		#correction value
+		self.cIso = [0,0,0]
+		self.cDelta = [1,1,1]
+
 		#Constant
 		self.position(0,0,0)
 
@@ -184,10 +188,18 @@ class LegSmooth(Leg) :
 	@staticmethod
 	def allOff() :
 		for leg in LegSmooth :
-			leg.off()
+			leg.off()		
 
+	@staticmethod
+	def waitUntil() :
+		while not LegSmooth.allReady() :
+			LegSmooth.updateAll()
 
 	#METHODES
+
+	def setCorrectionValues(self, _c, _d) :
+		self.cIso = _c
+		self.cDelta = _d
 
 	def setSpeed(self, value):
 		"""
@@ -231,6 +243,7 @@ class LegSmooth(Leg) :
 
 
 
+
 	def update(self):
 		"""
 		compute position from last position trough a ease function
@@ -252,7 +265,7 @@ class LegSmooth(Leg) :
 
 
 		#Moving motor with inherited methode to the computed value
-		Leg.position(self, self.phiValue, self.aValue, self.bValue)
+		Leg.position(self, self.phiValue*self.cDelta[0]+self.cIso[0], self.aValue*self.cDelta[1]+self.cIso[1], self.bValue*self.cDelta[2]+self.cIso[2])
 
 
 
