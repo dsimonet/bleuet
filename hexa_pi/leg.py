@@ -286,7 +286,7 @@ if __name__ == '__main__':
 	leg_5 = LegSmooth(4, 5, 6)
 	leg_6 = LegSmooth(0, 1, 2)
 
-	LegSmooth.setSpeedAll(80)
+	LegSmooth.setSpeedAll(20)
 
 	for leg in LegSmooth :
 		leg.position(0,0,0)
@@ -311,9 +311,9 @@ if __name__ == '__main__':
 		while not LegSmooth.allReady() :
 			LegSmooth.updateAll()
 
-		time.sleep(1)
+		time.sleep(0.1)
 
 		LegSmooth.allOff()
 
-		time.sleep(1)
+		time.sleep(0.1)
 
