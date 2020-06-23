@@ -11,19 +11,13 @@ from threading import *
 
 # init leg
 # number is the port on PCA card used by this leg
-leg_1 = LegSmooth(0,1,2)
-leg_2 = LegSmooth(4,5,6)
-leg_3 = LegSmooth(8,9,10)
-leg_4 = LegSmooth(16, 17, 18)
-leg_5 = LegSmooth(20, 21, 22)
-leg_6 = LegSmooth(24, 25, 26)
-
-leg_1.mot_phi.reverseMotor()
-leg_2.mot_phi.reverseMotor()
-leg_3.mot_phi.reverseMotor()
-leg_4.mot_phi.reverseMotor()
-leg_5.mot_phi.reverseMotor()
-leg_6.mot_phi.reverseMotor()
+leg_1 = LegIK(24,25,26)
+leg_2 = LegIK(20,21,22)
+leg_3 = LegIK(16,17,18)
+leg_3.setCorrectionValues([0,5,0],[1,0.95,1])
+leg_4 = LegIK(8, 9, 10)
+leg_5 = LegIK(4, 5, 6)
+leg_6 = LegIK(0, 1, 2)
 
 #sbus to catch info from frSky receiver
 sbus = SBUSReceiver('/dev/ttyS0')
@@ -64,10 +58,10 @@ class legUpdateThread(Thread) :
 
 
 
-# sbusUpdateThread_instance = sbusUpdateThread()
+sbusUpdateThread_instance = sbusUpdateThread()
 LegSmoothThread_instance = legUpdateThread()
 
-# sbusUpdateThread_instance.start()
+sbusUpdateThread_instance.start()
 LegSmoothThread_instance.start()
 
 ############
@@ -83,7 +77,7 @@ def walkCycle(h, v):
 	subStep =  majorStep/3.0
 	microStep = remap((v%majorStep)%subStep, 0, subStep, 0, 1)
 
-	print( "majorStep : % 5.2f, subStep : % 5.2f" %(v, microStep) )  
+	#print( "majorStep : % 5.2f, subStep : % 5.2f" %(v, microStep) )  
 	upAPosition = 10
 	upBPosition = -80
 	downAPosition = -h
@@ -93,39 +87,15 @@ def walkCycle(h, v):
 
 	if v < majorStep :
 		leg_1.position(phiFront,downAPosition,downBPosition)
-		leg_3.position(phiFront,downAPosition,downBPosition)
-		leg_5.position(-phiFront,downAPosition,downBPosition)
-
-		leg_2.position(phiBack,upAPosition,upBPosition)
-		leg_4.position(-phiBack,upAPosition,upBPosition)
-		leg_6.position(-phiBack,upAPosition,upBPosition)
 
 	elif v > majorStep and v < majorStep*2:
 		leg_1.position(phiBack,downAPosition,downBPosition)
-		leg_3.position(phiBack,downAPosition,downBPosition)
-		leg_5.position(-phiBack,downAPosition,downBPosition)
-
-		leg_2.position(phiFront,upAPosition,upBPosition)
-		leg_4.position(-phiFront,upAPosition,upBPosition)
-		leg_6.position(-phiFront,upAPosition,upBPosition)
 
 	elif v > majorStep*2 and v < majorStep * 3:
 		leg_1.position(phiBack,upAPosition,upBPosition)
-		leg_3.position(phiBack,upAPosition,upBPosition)
-		leg_5.position(-phiBack,upAPosition,upBPosition)
-
-		leg_2.position(phiFront,downAPosition,downBPosition)
-		leg_4.position(-phiFront,downAPosition,downBPosition)
-		leg_6.position(-phiFront,downAPosition,downBPosition)
 
 	elif v > majorStep*3 :
 		leg_1.position(phiFront,upAPosition,upBPosition)
-		leg_3.position(phiFront,upAPosition,upBPosition)
-		leg_5.position(-phiFront,upAPosition,upBPosition)
-
-		leg_2.position(phiBack,downAPosition,downBPosition)
-		leg_4.position(-phiBack,downAPosition,downBPosition)
-		leg_6.position(-phiBack,downAPosition,downBPosition)
 
 
 '''
@@ -219,52 +189,40 @@ if __name__ == '__main__':
 	try :
 		while True :
 
-			#for testing wol cycle
+			#if Switch F is up and not receiver is not lost
+			if sbus.get_rx_channels()[15] > 512 and sbus.get_failsafe_status() == 0 :
 
-			#if time.time() - timer0 > 0.1 :
-			if LegSmooth.allReady() :
-				walkStep += 5
-				walkStep %= 100
+				#speed from pot S1
+				LegSmooth.setAllSpeed( remap(sbus.get_rx_channels()[14], 172, 1811, 5, 500) )
 
-			walkCycle(40, walkStep)
-
-			#limitation speed
-			#time.sleep(0.1)
-
-			# #if Switch F is up and not receiver is not lost
-			# if sbus.get_rx_channels()[15] > 512 and sbus.get_failsafe_status() == 0 :
-
-			# 	#speed from pot S1
-			# 	LegSmooth.setAllSpeed( remap(sbus.get_rx_channels()[14], 172, 1811, 5, 500) )
-
-			# 	h = remap(sbus.get_rx_channels()[0], 172, 1811, 0, 80)
-			# 	walkCycle(h, walkStep)
-			# 	if LegSmooth.allReady() :
-			# 		walkStep += remap(sbus.get_rx_channels()[2], 172, 1811, -5, 5)
-			# 		walkStep %= 100
+				h = remap(sbus.get_rx_channels()[0], 172, 1811, 0, 80)
+				walkCycle(h, walkStep)
+				if LegSmooth.allReady() :
+					walkStep += remap(sbus.get_rx_channels()[2], 172, 1811, -5, 5)
+					walkStep %= 100
 
 
-			# #if Switch F is down and not receiver is not lost
-			# elif sbus.get_rx_channels()[15] < 512 and sbus.get_failsafe_status() == 0 :
+			#if Switch F is down and not receiver is not lost
+			elif sbus.get_rx_channels()[15] < 512 and sbus.get_failsafe_status() == 0 :
 
-			# 	#speed from pot S1
-			# 	LegSmooth.setAllSpeed( remap(sbus.get_rx_channels()[14], 172, 1811, 5, 500) )
+				#speed from pot S1
+				LegSmooth.setAllSpeed( remap(sbus.get_rx_channels()[14], 172, 1811, 5, 500) )
 
-			# 	h = remap(sbus.get_rx_channels()[0], 172, 1811, 0, 80)
-			# 	for leg in LegSmooth:
-			# 		leg.position(0,-h,-90+h)
+				h = remap(sbus.get_rx_channels()[0], 172, 1811, 0, 80)
+				for leg in LegSmooth:
+					leg.position(0,-h,-90+h)
 
-			# #in any other case (receiver lost)
-			# else :
+			#in any other case (receiver lost)
+			else :
 
-			# 	if time.time() - timer0 > 0.5 :
-			# 		timer0 = time.time()
-			# 		print("No connexion with remote controler")
+				if time.time() - timer0 > 0.5 :
+					timer0 = time.time()
+					print("No connexion with remote controler")
 
-			# 	LegSmooth.setAllSpeed(50)
+				LegSmooth.setAllSpeed(50)
 
-			# 	for leg in LegSmooth:
-			# 		leg.position(0,0,0)
+				for leg in LegSmooth:
+					leg.position(0,0,0)
 
 
 

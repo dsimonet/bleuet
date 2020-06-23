@@ -145,6 +145,7 @@ class LegSmooth(Leg) :
 		for leg in LegSmooth:
 			leg.update()
 
+
 	@staticmethod
 	def updateNextLeg():
 		legToUpdate = (LegSmooth.lastLegUpdated+1)%len(LegSmooth._registry)
@@ -223,7 +224,7 @@ class LegSmooth(Leg) :
 			#if we are ready we can go for a trip from where we are
 			#so position and time are reseted and are our new starting point
 
-			self.timeBegin = time.time()
+			self.timeBegin = time.clock()
 
 			self.phiFrom = self.phiValue
 			self.aFrom = self.aValue
@@ -239,7 +240,7 @@ class LegSmooth(Leg) :
 			# we find the longest distance between *actual* position and to the new distance (it the trip we have to do)
 			distList = [abs(self.phiTo - self.phiValue), abs(self.aTo - self.aValue), abs(self.bTo - self.bValue)]
 			# and our new duration is the time we already done (cause we can't get it back), and duration between actual position and the new position
-			self.duration = time.time()-self.timeBegin + float ( max(distList) / self.speed ) 
+			self.duration = time.clock()-self.timeBegin + float ( max(distList) / self.speed ) 
 
 
 
@@ -254,10 +255,11 @@ class LegSmooth(Leg) :
 		d is the total time of the tween.
 		"""
 		
-		if (time.time()-self.timeBegin) < self.duration :
-			self.phiValue = ease.easeInOutQuad(time.time()-self.timeBegin, self.phiFrom, self.phiTo-self.phiFrom, self.duration) 
-			self.aValue = ease.easeInOutQuad(time.time()-self.timeBegin, self.aFrom, self.aTo-self.aFrom, self.duration) 
-			self.bValue = ease.easeInOutQuad(time.time()-self.timeBegin, self.bFrom, self.bTo-self.bFrom, self.duration)
+
+		if (time.clock()-self.timeBegin) < self.duration :
+			self.phiValue = ease.easeInOutQuad(time.clock()-self.timeBegin, self.phiFrom, self.phiTo-self.phiFrom, self.duration) 
+			self.aValue = ease.easeInOutQuad(time.clock()-self.timeBegin, self.aFrom, self.aTo-self.aFrom, self.duration) 
+			self.bValue = ease.easeInOutQuad(time.clock()-self.timeBegin, self.bFrom, self.bTo-self.bFrom, self.duration)
 		else : 
 			self.phiValue = self.phiTo
 			self.aValue = self.aTo
@@ -270,7 +272,7 @@ class LegSmooth(Leg) :
 
 
 	def ready(self):
-		if (time.time()-self.timeBegin) < self.duration :
+		if (time.clock()-self.timeBegin) < self.duration :
 			return False
 		else:
 			return True
@@ -299,7 +301,7 @@ if __name__ == '__main__':
 	leg_5 = LegSmooth(4, 5, 6)
 	leg_6 = LegSmooth(0, 1, 2)
 
-	LegSmooth.setSpeedAll(20)
+	LegSmooth.setSpeedAll(100)
 
 	for leg in LegSmooth :
 		leg.position(0,0,0)

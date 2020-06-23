@@ -55,7 +55,7 @@ class LegIK (LegSmooth):
 		self.orient = _orient
 
 	@staticmethod
-	def allPositionIk(_x,_y,_z) :
+	def allPositionIK(_x,_y,_z) :
 		for leg in LegIK :
 			leg.positionIK(_x,_y,_z)
 
@@ -78,14 +78,15 @@ class LegIK (LegSmooth):
 
 		return [0, math.degrees(theta1), math.degrees(theta2)]
 
-	def positionIK(self,_x,_y,_z):
+	def positionIK(self, _p):
 
 		#print("called with :", _x, _y, _z)	
 
+		_x = _p[0]
+		_y = _p[1]
+		_z = _p[2]
+
 		## ORIENTATION CALCULUS
-
-		
-
 		if _x == 0 :
 			if _y > 0 :
 				localAngle = math.pi/2
@@ -95,26 +96,6 @@ class LegIK (LegSmooth):
 				localAngle = 0
 		else:
 			localAngle = math.atan(_y/_x)
-
-		# if _x == 0 and _y == 0 :
-		# 	localAngle = 0;
-		# else :
-
-		# 	if not _x == 0 :
-		# 		if _x > 0 and _y >= 0 :
-		# 			localAngle = math.atan(_y/_x)
-		# 		elif _x < 0 and _y >= 0 :
-		# 			localAngle = math.pi - math.fabs( math.atan(_y/_x) )
-		# 		elif _x < 0 and _y < 0 :
-		# 			localAngle = - math.fabs( math.atan(_y/_x) )
-
-		# 	else :
-		# 		if _y > 0 :
-		# 			localAngle = math.pi/2
-		# 		elif _y < 0 :
-		# 			localAngle = -math.pi/2
-		# 		else :
-		# 			localAngle = 0;
 
 		localAngle = localAngle #- math.radians(self.orient)
 		#print ("local angle", math.degrees(localAngle ))
@@ -164,13 +145,13 @@ if __name__ == '__main__':
 
 	#  LEG IK TEST
 
-	leg_1 = LegIK(24,25,26)
 	leg_2 = LegIK(20,21,22)
 	leg_3 = LegIK(16,17,18)
 	leg_3.setCorrectionValues([0,5,0],[1,0.95,1])
 	leg_4 = LegIK(8, 9, 10)
 	leg_5 = LegIK(4, 5, 6)
 	leg_6 = LegIK(0, 1, 2)
+	leg_1 = LegIK(24,25,26)
 
 	LegIK.positionSync()
 	LegIK.setAllSpeed(100)
@@ -182,29 +163,23 @@ if __name__ == '__main__':
 	LegIK.allPositionIk(20, 0, -70)
 	LegIK.waitUntil()
 
-	# try :
-	# 	while True :
+	try :
+		while True :
 
-	# 		LegIK.allPositionIk(20, 0, -70)
-	# 		while not LegIK.allReady() :
-	# 			LegIK.updateAll()
+			LegIK.allPositionIk(20, 0, -70)
+			while not LegIK.allReady() :
+				LegIK.updateAll()
 
-	# 		LegIK.allPositionIk(20, 0, -50)
-	# 		while not LegIK.allReady() :
-	# 			LegIK.updateAll()				
+			LegIK.allPositionIk(20, 0, -50)
+			while not LegIK.allReady() :
+				LegIK.updateAll()				
 
-	# except KeyboardInterrupt:
+	except KeyboardInterrupt:
 
-	LegIK.setAllSpeed(50)
+		LegIK.setAllSpeed(50)
 
-	for leg in LegIK :
-		leg.position(0,0,0)
+		LegIK.allPosition(0,0,0)
+		LegIK.waitUntil()
 
-	while not LegIK.allReady() :
-		LegIK.updateAll()
+		LegIK.allOff()
 
-	time.sleep(0.1)
-
-	#LegIK.allOff()
-
-	time.sleep(0.1)
