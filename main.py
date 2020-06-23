@@ -14,10 +14,19 @@ from threading import *
 leg_1 = LegIK(24,25,26)
 leg_2 = LegIK(20,21,22)
 leg_3 = LegIK(16,17,18)
-leg_3.setCorrectionValues([0,5,0],[1,0.95,1])
+
 leg_4 = LegIK(8, 9, 10)
 leg_5 = LegIK(4, 5, 6)
 leg_6 = LegIK(0, 1, 2)
+
+leg_1.setOrient(60.0)
+leg_2.setOrient(0.0)
+leg_3.setOrient(-60.0)
+leg_4.setOrient(-120.0)
+leg_5.setOrient(180.0)
+leg_6.setOrient(120.0)
+
+leg_3.setCorrectionValues([0,5,0],[1,0.95,1])
 
 #sbus to catch info from frSky receiver
 sbus = SBUSReceiver('/dev/ttyS0')
@@ -117,15 +126,13 @@ if __name__ == '__main__':
 					WalkCycle.setHeightStep( h2 )
 
 					dir = remap(sbus.get_rx_channels()[3], 172, 1811, -1.0, +1.0)
-					print dir
 					
-					leg_1.positionIK( WalkCycle.getWalkPosition( walk_value+100*0/6, math.radians(90-20), -20, dir ) )
-					# leg_2.positionIK( WalkCycle.getWalkPosition( walk_value+100*1/6, math.radians(90-20), 0, dir ) )
-					# leg_3.positionIK( WalkCycle.getWalkPosition( walk_value+100*2/6, math.radians(90-20), +20, dir ) )
-
-					# leg_4.positionIK( WalkCycle.getWalkPosition( walk_value+100*5/6, math.radians(-90-20), -20, dir ) )
-					# leg_5.positionIK( WalkCycle.getWalkPosition( walk_value+100*4/6, math.radians(-90-20), 0, dir ) )
-					# leg_6.positionIK( WalkCycle.getWalkPosition( walk_value+100*3/6, math.radians(-90-20), +20, dir ) )
+					leg_1.positionIK( WalkCycle.getWalkPosition( leg_1, walk_value+100*0/6, -50, dir ) )
+					leg_2.positionIK( WalkCycle.getWalkPosition( leg_2, walk_value+100*1/6, 0, dir ) )
+					leg_3.positionIK( WalkCycle.getWalkPosition( leg_3, walk_value+100*2/6, 30, dir ) )
+					leg_4.positionIK( WalkCycle.getWalkPosition( leg_4, walk_value+100*5/6, -40, dir ) )
+					leg_5.positionIK( WalkCycle.getWalkPosition( leg_5, walk_value+100*4/6, 0, dir ) )
+					leg_6.positionIK( WalkCycle.getWalkPosition( leg_6, walk_value+100*3/6, +40, dir ) )
 
 					LegIK.positionSync()
 					if LegSmooth.allReady() :

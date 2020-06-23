@@ -39,7 +39,7 @@ class LegIK (LegSmooth):
 		and orientation from origin (front is 0°)
 		'''
 
-		self.orient
+		self.orient = 0.0
 
 		self.minRot = math.radians(-35)
 		self.maxRot = math.radians(35)
@@ -53,6 +53,9 @@ class LegIK (LegSmooth):
 
 	def setOrient(self, _orient) :
 		self.orient = _orient
+
+	def getOrient(self) :
+		return self.orient
 
 	@staticmethod
 	def allPositionIK(_p) :
