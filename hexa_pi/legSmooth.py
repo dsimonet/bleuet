@@ -166,14 +166,26 @@ class LegSmooth(Leg) :
 			#looking for the longest distance we have to travel on each 3 motor. It's our duration for all 3 motors
 			# This is because all motor for each leg is sync. 
 			maxDuration = max( [abs(self.phiTo - self.phiFrom), abs(self.aTo - self.aFrom), abs(self.bTo - self.bFrom)] );
-			self.duration = float ( maxDuration ) / self.speed 
+			if maxDuration < 0.01 :
+				Leg.position(self, self.phiTo*self.cDelta[0]+self.cIso[0], self.aTo*self.cDelta[1]+self.cIso[1], self.bTo*self.cDelta[2]+self.cIso[2])
+				self.duration = 0
+			else:
+				self.duration = float ( maxDuration ) / self.speed
+
 
 		else:
 			# else it's a bit triky. 
 			# we find the longest distance between *actual* position and to the new distance (it the trip we have to do)
 			distList = [abs(self.phiTo - self.phiValue), abs(self.aTo - self.aValue), abs(self.bTo - self.bValue)]
 			# and our new duration is the time we already done (cause we can't get it back), and duration between actual position and the new position
-			self.duration = time.clock()-self.timeBegin + float ( max(distList) / self.speed ) 
+			duration = time.clock()-self.timeBegin + float ( max(distList) / self.speed )
+
+			if duration < 0.01 :
+				Leg.position(self, self.phiTo*self.cDelta[0]+self.cIso[0], self.aTo*self.cDelta[1]+self.cIso[1], self.bTo*self.cDelta[2]+self.cIso[2])
+				self.duration = 0
+			else:
+				self.duration = duration
+
 
 
 

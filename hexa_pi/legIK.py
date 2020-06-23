@@ -82,9 +82,9 @@ class LegIK (LegSmooth):
 
 		#print("called with :", _x, _y, _z)	
 
-		_x = _p[0]
-		_y = _p[1]
-		_z = _p[2]
+		_x = (float)(_p[0])
+		_y = (float)(_p[1])
+		_z = (float)(_p[2])
 
 		## ORIENTATION CALCULUS
 		if _x == 0 :
@@ -160,16 +160,11 @@ if __name__ == '__main__':
 	try :
 		while True :
 
-			# LegIK.allPositionIK([20, 0, -65])
-			# LegIK.waitUntil()
-
-			LegIK.allPositionIK([20, 0, -45])
+			for leg in LegIK :
+				leg.positionIK([random.randint(15,25), random.randint(-5,5), random.randint(-65,-55)])
 			LegIK.positionSync()
 			LegIK.waitUntil()
-
-			LegIK.allPositionIK([20, 15, -45])
-			LegIK.positionSync()
-			LegIK.waitUntil()		
+	
 
 	except KeyboardInterrupt:
 
