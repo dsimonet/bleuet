@@ -2,7 +2,7 @@
 #-*- coding: utf-8 -*-
 
 
-from leg import *
+from legSmooth import *
 import numpy
 
 ######################
@@ -55,9 +55,9 @@ class LegIK (LegSmooth):
 		self.orient = _orient
 
 	@staticmethod
-	def allPositionIK(_x,_y,_z) :
+	def allPositionIK(_p) :
 		for leg in LegIK :
-			leg.positionIK(_x,_y,_z)
+			leg.positionIK(_p)
 
 	def getPositionFromDC(self, _phi, _A, _B):
 		#ok
@@ -154,29 +154,26 @@ if __name__ == '__main__':
 	leg_1 = LegIK(24,25,26)
 
 	LegIK.positionSync()
-	LegIK.setAllSpeed(100)
+	LegIK.setAllSpeed(150)
 	
-
-	LegIK.allPositionIk(0, 0, -30)
-	LegIK.waitUntil()
-
-	LegIK.allPositionIk(20, 0, -70)
-	LegIK.waitUntil()
 
 	try :
 		while True :
 
-			LegIK.allPositionIk(20, 0, -70)
-			while not LegIK.allReady() :
-				LegIK.updateAll()
+			# LegIK.allPositionIK([20, 0, -65])
+			# LegIK.waitUntil()
 
-			LegIK.allPositionIk(20, 0, -50)
-			while not LegIK.allReady() :
-				LegIK.updateAll()				
+			LegIK.allPositionIK([20, 0, -45])
+			LegIK.positionSync()
+			LegIK.waitUntil()
+
+			LegIK.allPositionIK([20, 15, -45])
+			LegIK.positionSync()
+			LegIK.waitUntil()		
 
 	except KeyboardInterrupt:
 
-		LegIK.setAllSpeed(50)
+		LegIK.setAllSpeed(75)
 
 		LegIK.allPosition(0,0,0)
 		LegIK.waitUntil()

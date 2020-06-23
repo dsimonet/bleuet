@@ -8,12 +8,16 @@ import numpy
 
 class WalkCycle :
 
+	distance = 0
 	origin = [0,0,0]
 	
 	@staticmethod
 	def setOrigin(_p) :
 		WalkCycle.origin = _p
 
+	@staticmethod
+	def setDistance(_d) :
+		WalkCycle.distance = _d
 
 	@staticmethod
 	def getWalkPosition(_v, _phi):
@@ -24,33 +28,48 @@ class WalkCycle :
 		inv_microstep = 1-microstep
 		output = WalkCycle.origin
 
-		if _v > 0 and _v < 25 :
-			#go back
-			output = [WalkCycle.origin[0]-50, WalkCycle.origin[1], WalkCycle.origin[2]]
-		elif _v >= 25 and _v < 50 :
-			#go up
-			output = [WalkCycle.origin[0]-50, WalkCycle.origin[1], WalkCycle.origin[2]+20]
-		elif _v >= 50  and _v < 75 :
-			#go front
-			output = [WalkCycle.origin[0]-50, WalkCycle.origin[1], WalkCycle.origin[2]+20]
-		elif _v >= 75 and _v < 100 :
-			#go down
-			output = [WalkCycle.origin[0], WalkCycle.origin[1], WalkCycle.origin[2]+20]
-		else : 
-			output = WalkCycle.origin
+		anim_coord = [
+			[-WalkCycle.distance/2,	0,	0],			#back
+			[-WalkCycle.distance/2,	0,	+20],		#go up
+			[+WalkCycle.distance/2,	0,	+20], 		#go front
+			[+WalkCycle.distance/2,	0,	0] 			#go down
+		]
 
-		#print(_v, microstep, output)
+		#rotating the modification around his center
+		# and adding them to the position.
+		# this is not rotating the origin of the leg
 		'''
 		|cos θ   −sin θ   0| |x|   |x cos θ − y sin θ|   |x'|
     	|sin θ    cos θ   0| |y| = |x sin θ + y cos θ| = |y'|
     	|  0       0      1| |z|   |        z        |   |z'|
 		'''
-		output_r = [0,0,0]
-		output_r[0] = output[0]*math.cos(_phi) - output[1] * math.sin(_phi)
-		output_r[1] = output[0]*math.sin(_phi) + output[1] * math.cos(_phi)
-		output_r[2] = output[2]
-		return output_r
-		#return WalkCycle.origin
+
+		i = 0
+		for a in anim_coord :
+			out = [0,0,0]
+			out[0] = a[0]*math.cos(_phi) - a[1] * math.sin(_phi)
+			out[1] = a[0]*math.sin(_phi) + a[1] * math.cos(_phi)
+			out[2] = a[2]
+			anim_coord[i] = out
+			i = i +1 ## ????
+
+		if _v >= 0 and _v < 25 :
+			#go back
+			output = [WalkCycle.origin[0]+anim_coord[0][0], WalkCycle.origin[1]+anim_coord[0][1], WalkCycle.origin[2]+anim_coord[0][2]]
+		elif _v >= 25 and _v < 50 :
+			#go up
+			output = [WalkCycle.origin[0]+anim_coord[1][0], WalkCycle.origin[1]+anim_coord[1][1], WalkCycle.origin[2]+anim_coord[1][2]]
+		elif _v >= 50  and _v < 75 :
+			#go front
+			output = [WalkCycle.origin[0]+anim_coord[2][0], WalkCycle.origin[1]+anim_coord[2][1], WalkCycle.origin[2]+anim_coord[2][2]]
+		elif _v >= 75 and _v < 100 :
+			#go down
+			output = [WalkCycle.origin[0]+anim_coord[3][0], WalkCycle.origin[1]+anim_coord[3][1], WalkCycle.origin[2]+anim_coord[3][2]]
+
+		#print(_v, microstep, output)
+
+		return output
+
 
 
 if __name__ == '__main__':
@@ -77,17 +96,26 @@ if __name__ == '__main__':
 	# LegIK.waitUntil()
 
 
-	WalkCycle.setOrigin([70, 0, -60])
+	WalkCycle.setOrigin([40, 0, -60])
+	WalkCycle.setDistance(40)
+
+
 
 	walk_value = 0
-	t0 = 0
-	t1 = 0
+	# t0 = 0
+	# t1 = 0
 	try :
 		while True :
 
+
 			if LegIK.allReady() :
-				
-				leg_1.positionIK( WalkCycle.getWalkPosition( walk_value, math.radians(-15) ) )
+				leg_1.positionIK( WalkCycle.getWalkPosition( walk_value, math.radians(90-20) ) )
+				leg_2.positionIK( WalkCycle.getWalkPosition( walk_value+50, math.radians(90-20) ) )
+				leg_3.positionIK( WalkCycle.getWalkPosition( walk_value, math.radians(90-20) ) )
+
+				leg_4.positionIK( WalkCycle.getWalkPosition( walk_value+50, math.radians(-90-20) ) )
+				leg_5.positionIK( WalkCycle.getWalkPosition( walk_value, math.radians(-90-20) ) )
+				leg_6.positionIK( WalkCycle.getWalkPosition( walk_value+50, math.radians(-90-20) ) )
 
 				LegIK.positionSync()
 				walk_value = walk_value + 25
@@ -95,6 +123,7 @@ if __name__ == '__main__':
 
 
 			LegSmooth.updateAll()
+
 
 			#print(leg, time.clock() - t0)
 
@@ -113,8 +142,8 @@ if __name__ == '__main__':
 
 		LegIK.setAllSpeed(75)
 
-		LegIK.allPosition(0,0,0)
+		LegIK.allPositionIK([40, 0, -60])
 		LegIK.waitUntil()
 
-		LegIK.allOff()
+		#LegIK.allOff()
 
