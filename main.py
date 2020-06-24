@@ -113,6 +113,8 @@ if __name__ == '__main__':
 					for leg in LegSmooth:
 						leg.position(0,0,0)
 
+					LegIJ.waitUntil()
+
 				#if Switch F is up and not receiver is not lost
 				elif sbus.get_rx_channels()[15] > 512  :
 
@@ -128,10 +130,10 @@ if __name__ == '__main__':
 					dir = remap(sbus.get_rx_channels()[3], 172, 1811, -1.0, +1.0)
 					
 					leg_1.positionIK( WalkCycle.getWalkPosition( leg_1, walk_value+100*0/6, -50, dir ) )
-					leg_2.positionIK( WalkCycle.getWalkPosition( leg_2, walk_value+100*1/6, 0, dir ) )
+					leg_2.positionIK( WalkCycle.getWalkPosition( leg_2, walk_value+100*4/6, 0, dir ) )
 					leg_3.positionIK( WalkCycle.getWalkPosition( leg_3, walk_value+100*2/6, 30, dir ) )
 					leg_4.positionIK( WalkCycle.getWalkPosition( leg_4, walk_value+100*5/6, -40, dir ) )
-					leg_5.positionIK( WalkCycle.getWalkPosition( leg_5, walk_value+100*4/6, 0, dir ) )
+					leg_5.positionIK( WalkCycle.getWalkPosition( leg_5, walk_value+100*1/6, 0, dir ) )
 					leg_6.positionIK( WalkCycle.getWalkPosition( leg_6, walk_value+100*3/6, +40, dir ) )
 
 					LegIK.positionSync()

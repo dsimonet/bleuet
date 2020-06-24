@@ -8,20 +8,7 @@ import numpy
 ######################
 """	LEG IK """
 ######################
-'''
- size is in mm angle is radian if possible
- radian range [pi; -pi[
-			^  90° / 0
-	-x+y	|		+x+y
-			|
-			| XY origin
- 180°-------R--------> 0° /
-			|
-	-x-y	|		+x-y
-			|
-		   270°
 
-'''
 import math
 
 class LegIK (LegSmooth):

@@ -40,13 +40,13 @@ class WalkCycle :
 		WalkCycle.computeAnimCoord()
 
 	@staticmethod
-	def getWalkPosition(_leg, _v, _phi, _dir):		#iso to be removed
+	def getWalkPosition(_leg, _v, _phi, _dir):
 
 		'''
 		call with  : 
 			_leg -> leg object (to find orientation)
-			_phi -> give hability to increase or decrease orientation for each Leg
 			_v -> évolution of the walCycle from 0 to 100
+			_phi -> give hability to increase or decrease orientation for each Leg
 			_dir -> direction of the walkcycle
 
 			return a value of position in respect with legIK(x, y, z)
