@@ -61,32 +61,14 @@ class WalkCycle :
 
 		local_anim_coord = [0,0,0]
 
-		#find where we are in the animation step
-		if _v >= 0 and _v < 25 :
-			#go back
-			local_anim_coord[0] = WalkCycle.anim_coord[3][0] + ( WalkCycle.anim_coord[0][0] - WalkCycle.anim_coord[3][0] ) * microstep
-			local_anim_coord[1] = WalkCycle.anim_coord[3][1] + ( WalkCycle.anim_coord[0][1] - WalkCycle.anim_coord[3][1] ) * microstep
-			local_anim_coord[2] = WalkCycle.anim_coord[3][2] + ( WalkCycle.anim_coord[0][2] - WalkCycle.anim_coord[3][2] ) * microstep
-		elif _v >= 25 and _v < 50 :
-			#go up
-			local_anim_coord[0] = WalkCycle.anim_coord[0][0] + ( WalkCycle.anim_coord[1][0] - WalkCycle.anim_coord[0][0] ) * microstep
-			local_anim_coord[1] = WalkCycle.anim_coord[0][1] + ( WalkCycle.anim_coord[1][1] - WalkCycle.anim_coord[0][1] ) * microstep
-			local_anim_coord[2] = WalkCycle.anim_coord[0][2] + ( WalkCycle.anim_coord[1][2] - WalkCycle.anim_coord[0][2] ) * microstep
-		elif _v >= 50  and _v < 75 :
-			#go front
-			local_anim_coord[0] = WalkCycle.anim_coord[1][0] + ( WalkCycle.anim_coord[2][0] - WalkCycle.anim_coord[1][0] ) * microstep
-			local_anim_coord[1] = WalkCycle.anim_coord[1][1] + ( WalkCycle.anim_coord[2][1] - WalkCycle.anim_coord[1][1] ) * microstep
-			local_anim_coord[2] = WalkCycle.anim_coord[1][2] + ( WalkCycle.anim_coord[2][2] - WalkCycle.anim_coord[1][2] ) * microstep
-		elif _v >= 75 and _v < 100 :
-			#go down
-			local_anim_coord[0] = WalkCycle.anim_coord[2][0] + ( WalkCycle.anim_coord[3][0] - WalkCycle.anim_coord[2][0] ) * microstep
-			local_anim_coord[1] = WalkCycle.anim_coord[2][1] + ( WalkCycle.anim_coord[3][1] - WalkCycle.anim_coord[2][1] ) * microstep
-			local_anim_coord[2] = WalkCycle.anim_coord[2][2] + ( WalkCycle.anim_coord[3][2] - WalkCycle.anim_coord[2][2] ) * microstep
+		current_step = _v * len(WalkCycle.anim_coord) / 100
+		current_step =  (int)(math.floor(current_step))
 
+		next_step = (current_step+1)%len(WalkCycle.anim_coord)
 
-		# local_anim_coord[0] = local_anim_coord[0] 
-		# local_anim_coord[1] = local_anim_coord[1] 
-		# local_anim_coord[2] = local_anim_coord[2] 
+		local_anim_coord[0] = WalkCycle.anim_coord[current_step][0] + ( WalkCycle.anim_coord[next_step][0] - WalkCycle.anim_coord[current_step][0] ) * microstep
+		local_anim_coord[1] = WalkCycle.anim_coord[current_step][1] + ( WalkCycle.anim_coord[next_step][1] - WalkCycle.anim_coord[current_step][1] ) * microstep
+		local_anim_coord[2] = WalkCycle.anim_coord[current_step][2] + ( WalkCycle.anim_coord[next_step][2] - WalkCycle.anim_coord[current_step][2] ) * microstep
 
 		# print(microstep, local_anim_coord)
 
@@ -156,7 +138,7 @@ if __name__ == '__main__':
 
 			if LegIK.allReady() :
 
-				dire = 0.5
+				dire = 0
 
 				leg_1.positionIK( WalkCycle.getWalkPosition( leg_1, walk_value, -50, dire ) )
 				leg_2.positionIK( WalkCycle.getWalkPosition( leg_2, walk_value, 0, dire ) )

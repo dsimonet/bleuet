@@ -28,6 +28,8 @@ leg_6.setOrient(120.0)
 
 leg_3.setCorrectionValues([0,5,0],[1,0.95,1])
 
+LegSmooth.smoothActivate(False)		
+
 #sbus to catch info from frSky receiver
 sbus = SBUSReceiver('/dev/ttyS0')
 
@@ -40,34 +42,45 @@ Because of the python GLI interpreter and because Raspberry pi Zero have only on
 multitrheading make the update function slower than put in the main loop.
 ''' 
 
-# sbusUpdate_continue = True
-# class sbusUpdateThread(Thread) :
-# 	def __init__(self):
-# 		Thread.__init__(self)
+## TIMERS
+timerSbus = 0
+timerLegUpdate = 0
+timerFSM = 0
 
-# 	def run(self):
-# 		while sbusUpdate_continue:
-# 			sbus.update()
+sbusUpdate_continue = True
+class sbusUpdateThread(Thread) :
+	def __init__(self):
+		Thread.__init__(self)
 
-# #Leg smooth is threaded for perfomance issues
-#  # this alow to stop this thread
-# LegSmooth_continue = True
-# class legUpdateThread(Thread) :
-# 	def __init__(self):
-# 		Thread.__init__(self)
+	def run(self):
+		global timerSbus
+		while sbusUpdate_continue:
+			if(time.clock() - timerSbus > 0.1) :
+				timerSbus = time.clock()
+			sbus.update()
 
-# 	def run(self):
-# 		while LegSmooth_continue:
-# 			if not LegSmooth.allReady() :
-# 				LegSmooth.updateAll()
+#Leg smooth is threaded for perfomance issues
+ # this alow to stop this thread
+LegSmooth_continue = True
+class legUpdateThread(Thread) :
+	def __init__(self):
+		Thread.__init__(self)
+
+	def run(self):
+		while LegSmooth_continue:
+			#if(time.clock() - timerLegUpdate > 0.1) :
+			#	timerLegUpdate = time.clock()
+			#if not LegSmooth.allReady() :
+			if not LegIK.ready() :
+				LegSmooth.updateAll()
 
 
 
-# sbusUpdateThread_instance = sbusUpdateThread()
-# LegSmoothThread_instance = legUpdateThread()
+sbusUpdateThread_instance = sbusUpdateThread()
+LegSmoothThread_instance = legUpdateThread()
 
-# sbusUpdateThread_instance.start()
-# LegSmoothThread_instance.start()
+sbusUpdateThread_instance.start()
+LegSmoothThread_instance.start()
 
 
 ##############################################
@@ -81,9 +94,6 @@ multitrheading make the update function slower than put in the main loop.
 
 if __name__ == '__main__':
 
-	timerFSM = time.clock()
-	timerSbus = time.clock()
-
 	walk_value = 0
 	WalkCycle.setOrigin([40, 0, -60])
 	WalkCycle.setDistance(40)
@@ -92,31 +102,24 @@ if __name__ == '__main__':
 	try :
 		while True :
 
-			LegIK.updateAll()
-			
-			if(time.clock() - timerSbus > 0.1) :
-				timerSbus = time.clock()
-				sbus.update()
+			if time.clock() - timerFSM > 0.2:
 
+				# #in any other case (receiver lost)
+				# if sbus.get_failsafe_status() == 1 :
 
+				# 	print("No connexion with remote controler")
 
-			if time.clock() - timerFSM > 0.001 :
-				timerFSM = time.clock()
+				# 	LegSmooth.setAllSpeed(50)
 
-				#in any other case (receiver lost)
-				if sbus.get_failsafe_status() == 1 :
+				# 	for leg in LegSmooth:
+				# 		leg.position(0,0,0)
 
-					print("No connexion with remote controler")
-
-					LegSmooth.setAllSpeed(50)
-
-					for leg in LegSmooth:
-						leg.position(0,0,0)
-
-					LegIJ.waitUntil()
+				# 	LegIK.waitUntil()
 
 				#if Switch F is up and not receiver is not lost
-				elif sbus.get_rx_channels()[15] > 512  :
+				if sbus.get_rx_channels()[15] > 512  :
+
+					#LegSmooth.setAllSpeed(250)
 
 					#speed from pot S1
 					LegSmooth.setAllSpeed( remap(sbus.get_rx_channels()[14], 172, 1811, 5, 600) )
@@ -136,11 +139,11 @@ if __name__ == '__main__':
 					leg_5.positionIK( WalkCycle.getWalkPosition( leg_5, walk_value+100*1/6, 0, dir ) )
 					leg_6.positionIK( WalkCycle.getWalkPosition( leg_6, walk_value+100*3/6, +40, dir ) )
 
-					LegIK.positionSync()
-					if LegSmooth.allReady() :
-						pass
-					walk_value += remap(sbus.get_rx_channels()[2], 172, 1811, -5, 5)
-					walk_value %= 100
+					# LegIK.positionSync()
+					# if LegSmooth.allReady() :
+					# 	pass
+					walk_value += remap(sbus.get_rx_channels()[2], 172, 1811, -10.0, 10.0)
+					walk_value %= 100.0
 
 
 				#if Switch F is down and not receiver is not lost
@@ -157,11 +160,10 @@ if __name__ == '__main__':
 
 
 	except KeyboardInterrupt:
-		# sbusUpdateThread_instance.cancel()
-		# LegSmooth_continue = False
-		# sbusUpdate_continue = False
 
-		# LegSmoothThread_instance.join()
-		# sbusUpdateThread_instance.join()
-		pass
+		LegSmooth_continue = False
+		sbusUpdate_continue = False
+
+		LegSmoothThread_instance.join()
+		sbusUpdateThread_instance.join()
 

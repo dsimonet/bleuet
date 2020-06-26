@@ -39,6 +39,8 @@ class LegSmooth(Leg) :
 		#init inherited class
 		Leg.__init__(self, _phi, _a, _b)
 
+		self.smoothing = True
+
 		#values
 		self.speed = float(250)#mm/s or degres/s --> 9G servo is 0.12second/ 60degree = 500 °/S
 		self.duration = 0
@@ -129,6 +131,11 @@ class LegSmooth(Leg) :
 		while not LegSmooth.allReady() :
 			LegSmooth.updateAll()
 
+	@staticmethod
+	def smoothActivate(_v) :
+		for leg in LegSmooth :
+			leg.smoothing = _v
+
 	#METHODES
 
 	def setCorrectionValues(self, _c, _d) :
@@ -152,39 +159,42 @@ class LegSmooth(Leg) :
 		self.aTo = _a
 		self.bTo = _b
 
+		if self.smoothing :
+			if self.ready() :
+				#if we are ready we can go for a trip from where we are
+				#so position and time are reseted and are our new starting point
 
-		if self.ready() :
-			#if we are ready we can go for a trip from where we are
-			#so position and time are reseted and are our new starting point
+				self.timeBegin = time.clock()
 
-			self.timeBegin = time.clock()
+				self.phiFrom = self.phiValue
+				self.aFrom = self.aValue
+				self.bFrom = self.bValue
+				
+				#looking for the longest distance we have to travel on each 3 motor. It's our duration for all 3 motors
+				# This is because all motor for each leg is sync. 
+				maxDuration = max( [abs(self.phiTo - self.phiFrom), abs(self.aTo - self.aFrom), abs(self.bTo - self.bFrom)] );
+				if maxDuration < 0.01 :
+					Leg.position(self, self.phiTo*self.cDelta[0]+self.cIso[0], self.aTo*self.cDelta[1]+self.cIso[1], self.bTo*self.cDelta[2]+self.cIso[2])
+					self.duration = 0
+				else:
+					self.duration = float ( maxDuration ) / self.speed
 
-			self.phiFrom = self.phiValue
-			self.aFrom = self.aValue
-			self.bFrom = self.bValue
-			
-			#looking for the longest distance we have to travel on each 3 motor. It's our duration for all 3 motors
-			# This is because all motor for each leg is sync. 
-			maxDuration = max( [abs(self.phiTo - self.phiFrom), abs(self.aTo - self.aFrom), abs(self.bTo - self.bFrom)] );
-			if maxDuration < 0.01 :
-				Leg.position(self, self.phiTo*self.cDelta[0]+self.cIso[0], self.aTo*self.cDelta[1]+self.cIso[1], self.bTo*self.cDelta[2]+self.cIso[2])
-				self.duration = 0
+
 			else:
-				self.duration = float ( maxDuration ) / self.speed
+				# else it's a bit triky. 
+				# we find the longest distance between *actual* position and to the new distance (it the trip we have to do)
+				distList = [abs(self.phiTo - self.phiValue), abs(self.aTo - self.aValue), abs(self.bTo - self.bValue)]
+				# and our new duration is the time we already done (cause we can't get it back), and duration between actual position and the new position
+				duration = time.clock()-self.timeBegin + float ( max(distList) / self.speed )
 
+				if duration < 0.01 :
+					Leg.position(self, self.phiTo*self.cDelta[0]+self.cIso[0], self.aTo*self.cDelta[1]+self.cIso[1], self.bTo*self.cDelta[2]+self.cIso[2])
+					self.duration = 0
+				else:
+					self.duration = duration
 
-		else:
-			# else it's a bit triky. 
-			# we find the longest distance between *actual* position and to the new distance (it the trip we have to do)
-			distList = [abs(self.phiTo - self.phiValue), abs(self.aTo - self.aValue), abs(self.bTo - self.bValue)]
-			# and our new duration is the time we already done (cause we can't get it back), and duration between actual position and the new position
-			duration = time.clock()-self.timeBegin + float ( max(distList) / self.speed )
-
-			if duration < 0.01 :
-				Leg.position(self, self.phiTo*self.cDelta[0]+self.cIso[0], self.aTo*self.cDelta[1]+self.cIso[1], self.bTo*self.cDelta[2]+self.cIso[2])
-				self.duration = 0
-			else:
-				self.duration = duration
+		else :
+			Leg.position(self, self.phiTo*self.cDelta[0]+self.cIso[0], self.aTo*self.cDelta[1]+self.cIso[1], self.bTo*self.cDelta[2]+self.cIso[2])
 
 
 
@@ -252,6 +262,7 @@ if __name__ == '__main__':
 	leg_6 = LegSmooth(0, 1, 2)
 
 	LegSmooth.setSpeedAll(100)
+	LegSmooth.smoothActivate(False)
 
 	for leg in LegSmooth :
 		leg.position(0,0,0)
@@ -264,17 +275,19 @@ if __name__ == '__main__':
 			if LegSmooth.allReady() :
 				for leg in LegSmooth :
 					leg.position(random.randint(-30,30),random.randint(-90,90),random.randint(-90,90))
-				LegSmooth.positionSync()
 
-			LegSmooth.updateAll()
+				LegSmooth.waitUntil()
+				time.sleep(0.5)
 
 	except KeyboardInterrupt:
+
+		LegSmooth.smoothActivate(True)
+		LegSmooth.setSpeedAll(50)
 
 		for leg in LegSmooth :
 			leg.position(0,0,0)
 
-		while not LegSmooth.allReady() :
-			LegSmooth.updateAll()
+		LegSmooth.waitUntil()
 
 		time.sleep(0.1)
 
